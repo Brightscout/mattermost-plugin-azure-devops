@@ -870,7 +870,11 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 			},
 		}
 	case constants.SubscriptionEventRunStageWaitingForApproval:
-		organization := strings.Split(body.Resource.Pipeline.Links.Web.Href, "/")[3]
+		organization := ""
+		webLinkPaths := strings.Split(body.Resource.Release.ReleaseDefinition.Links.Web.Href, "/")
+		if len(webLinkPaths) >= 4 {
+			organization = webLinkPaths[3]
+		}
 
 		approverTitle := "Approver(s)"
 		if body.Resource.Approval.ExecutionOrder == "inSequence" {
@@ -1358,7 +1362,7 @@ func (p *Plugin) handlePipelineApproveOrRejectRunRequest(w http.ResponseWriter, 
 	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
 	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
 		// TODO: prevent posting any error message except oAuth in DM for now and use dialog for all such cases
-		p.handlePipelineApprovalRequestUpdateError("Error decoding PostActionIntegrationRequest params: ", mattermostUserID, err)
+		p.handlePipelineApprovalRequestUpdateError("Error decoding PostActionIntegrationRequest param: ", mattermostUserID, err)
 		p.handleError(w, r, &serializers.Error{Code: http.StatusInternalServerError, Message: err.Error()})
 		return
 	}
@@ -1431,7 +1435,12 @@ func (p *Plugin) handlePipelineApproveOrRejectRunRequest(w http.ResponseWriter, 
 }
 
 func (p *Plugin) UpdatePipelineRunApprovalPost(approvalSteps []*serializers.ApprovalSteps, minRequiredApprovers int, status, postID, mattermostUserID string) error {
-	post, _ := p.API.GetPost(postID)
+	post, err := p.API.GetPost(postID)
+	if err != nil {
+		p.handlePipelineApprovalRequestUpdateError(fmt.Sprintf("Error in fetching post ID: %s", postID), mattermostUserID, err)
+		return err
+	}
+
 	slackAttachment := post.Attachments()[0]
 	noOFApprovalsReached := 0
 
@@ -1462,7 +1471,7 @@ func (p *Plugin) UpdatePipelineRunApprovalPost(approvalSteps []*serializers.Appr
 
 	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})
 	if _, err := p.API.UpdatePost(post); err != nil {
-		p.handlePipelineApprovalRequestUpdateError("Error in updating post", mattermostUserID, err)
+		p.handlePipelineApprovalRequestUpdateError(fmt.Sprintf("Error in fetching post ID: %s", postID), mattermostUserID, err)
 		return err
 	}
 

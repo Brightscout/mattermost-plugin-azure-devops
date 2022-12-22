@@ -18,8 +18,8 @@ const (
 	PathGetUserChannelsForTeam    = "/channels/{team_id:[A-Za-z0-9]+}"
 	PathGetGitRepositories        = "/{organization:[A-Za-z0-9-/ ]+}/{project:[A-Za-z0-9-/ ]+}/repositories"
 	PathGetGitRepositoryBranches  = "/{organization:[A-Za-z0-9-/ ]+}/{project:[A-Za-z0-9-/ ]+}/repositories/{repository:[A-Za-z0-9-/]+}/branches"
-	PathPipelineReleaseRequest    = "/pipeline_release_request"
-	PathPipelineRunRequest        = "/pipeline_run_request"
+	PathPipelineReleaseRequest    = "/pipeline-release-request"
+	PathPipelineRunRequest        = "/pipeline-run-request"
 
 	// Azure API paths
 	CreateTask                              = "/%s/%s/_apis/wit/workitems/$%s?api-version=7.1-preview.3"

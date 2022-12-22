@@ -317,7 +317,11 @@ func (c *client) UpdatePipelineRunApprovalRequest(pipelineApproveRequestPayload 
 
 	var pipelineRunApproveResponse *serializers.PipelineRunApproveResponse
 	_, statusCode, err := c.CallJSON(c.plugin.getConfiguration().AzureDevopsAPIBaseURL, pipelineApproveRunRequestURL, http.MethodPatch, mattermostUserID, &pipelineApproveRequestPayload, &pipelineRunApproveResponse, nil)
-	return pipelineRunApproveResponse, statusCode, err
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return pipelineRunApproveResponse, statusCode, nil
 }
 
 func (c *client) GetSubscriptionFilterPossibleValues(request *serializers.GetSubscriptionFilterPossibleValuesRequestPayload, mattermostUserID string) (*serializers.SubscriptionFilterPossibleValuesResponseFromClient, int, error) {
