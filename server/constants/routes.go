@@ -35,4 +35,6 @@ const (
 	DeleteSubscription                      = "/%s/_apis/hooks/subscriptions/%s?api-version=6.0"
 	PathGetSubscriptionFilterPossibleValues = "/subscriptions/filters"
 	GetSubscriptionFilterPossibleValues     = "%s/_apis/hooks/inputValuesQuery?api-version=6.0"
+	GetBuildDetails                         = "%s/%s/_apis/build/builds/%s?api-version=6.0"
+	GetReleaseDetails                       = "%s/%s/_apis/release/releases/%s?api-version=6.0"
 )

@@ -153,6 +153,32 @@ func (m *MockClient) UpdatePipelineApprovalRequest(arg0 *serializers.PipelineApp
 	return ret0, ret1
 }
 
+// GetBuildDetails mocks base method
+func (m *MockClient) GetBuildDetails(arg0, arg1, arg2, arg3 string) (*serializers.BuildDetails, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBuildDetails", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*serializers.BuildDetails)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetReleaseDetails mocks base method
+func (m *MockClient) GetReleaseDetails(arg0, arg1, arg2, arg3 string) (*serializers.ReleaseDetails, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetReleaseDetails", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*serializers.ReleaseDetails)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetBuildDetails indicates an expected call of GetBuildDetails
+func (mr *MockClientMockRecorder) GetBuildDetails(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBuildDetails", reflect.TypeOf((*MockClient)(nil).GetBuildDetails), arg0, arg1, arg2, arg3)
+}
+
 // GetPullRequest mocks base method
 func (m *MockClient) GetPullRequest(arg0, arg1, arg2, arg3 string) (*serializers.PullRequest, int, error) {
 	m.ctrl.T.Helper()
