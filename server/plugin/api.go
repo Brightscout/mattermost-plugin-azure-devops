@@ -1308,6 +1308,13 @@ func (p *Plugin) handlePipelineApproveOrRejectReleaseRequest(w http.ResponseWrit
 		return
 	}
 
+	alreadyUpdatedInformationPost := &model.Post{
+		UserId:    p.botUserID,
+		ChannelId: postActionIntegrationRequest.ChannelId,
+		Message:   constants.PipelinesRequestBeingProcessed,
+	}
+	loaderMessagePost := p.API.SendEphemeralPost(mattermostUserID, alreadyUpdatedInformationPost)
+
 	requestType := postActionIntegrationRequest.Context[constants.PipelineRequestContextRequestType].(string)
 	pipelineApproveRequestPayload := &serializers.PipelineApproveRequest{
 		Status:   requestType,
@@ -1352,6 +1359,8 @@ func (p *Plugin) handlePipelineApproveOrRejectReleaseRequest(w http.ResponseWrit
 		return
 	}
 
+	loaderMessagePost.Message = constants.PipelinesRequestProcessed
+	_ = p.API.UpdateEphemeralPost(mattermostUserID, loaderMessagePost)
 	response := &model.PostActionIntegrationResponse{}
 	p.returnPostActionIntegrationResponse(w, response)
 }
@@ -1370,9 +1379,9 @@ func (p *Plugin) handlePipelineApproveOrRejectRunRequest(w http.ResponseWriter, 
 	alreadyUpdatedInformationPost := &model.Post{
 		UserId:    p.botUserID,
 		ChannelId: postActionIntegrationRequest.ChannelId,
-		Message:   "Your approval/rejection request is being processed.",
+		Message:   constants.PipelinesRequestBeingProcessed,
 	}
-	alphaPost := p.API.SendEphemeralPost(mattermostUserID, alreadyUpdatedInformationPost)
+	loaderMessagePost := p.API.SendEphemeralPost(mattermostUserID, alreadyUpdatedInformationPost)
 
 	organization := postActionIntegrationRequest.Context[constants.PipelineRequestContextOrganization].(string)
 	projectID := postActionIntegrationRequest.Context[constants.PipelineRequestContextProjectID].(string)
@@ -1428,8 +1437,8 @@ func (p *Plugin) handlePipelineApproveOrRejectRunRequest(w http.ResponseWriter, 
 		return
 	}
 
-	alphaPost.Message = "Your approval/rejection request is processed."
-	_ = p.API.UpdateEphemeralPost(mattermostUserID, alphaPost)
+	loaderMessagePost.Message = constants.PipelinesRequestProcessed
+	_ = p.API.UpdateEphemeralPost(mattermostUserID, loaderMessagePost)
 	response := &model.PostActionIntegrationResponse{}
 	p.returnPostActionIntegrationResponse(w, response)
 }
