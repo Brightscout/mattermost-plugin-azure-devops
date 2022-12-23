@@ -885,7 +885,7 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 
 		approvers := ""
 		for _, approvalStep := range body.Resource.Approval.Steps {
-			approvers = approvers + approvalStep.AssignedApprover.DisplayName + "\n"
+			approvers += approvalStep.AssignedApprover.DisplayName + "\n"
 		}
 
 		attachment = &model.SlackAttachment{
@@ -912,7 +912,7 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 			Actions: []*model.PostAction{
 				{
 					Id:    constants.PipelineRequestIDApproved,
-					Type:  "button",
+					Type:  model.POST_ACTION_TYPE_BUTTON,
 					Name:  "Approve",
 					Style: "primary",
 					Integration: &model.PostActionIntegration{
@@ -927,7 +927,7 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 				},
 				{
 					Id:    constants.PipelineRequestIDRejected,
-					Type:  "button",
+					Type:  model.POST_ACTION_TYPE_BUTTON,
 					Name:  "Reject",
 					Style: "danger",
 					Integration: &model.PostActionIntegration{
@@ -984,7 +984,7 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 			Actions: []*model.PostAction{
 				{
 					Id:    constants.PipelineRequestIDApproved,
-					Type:  "button",
+					Type:  model.POST_ACTION_TYPE_BUTTON,
 					Name:  "Approve",
 					Style: "primary",
 					Integration: &model.PostActionIntegration{
@@ -999,7 +999,7 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 				},
 				{
 					Id:    constants.PipelineRequestIDRejected,
-					Type:  "button",
+					Type:  model.POST_ACTION_TYPE_BUTTON,
 					Name:  "Reject",
 					Style: "danger",
 					Integration: &model.PostActionIntegration{
@@ -1432,50 +1432,6 @@ func (p *Plugin) handlePipelineApproveOrRejectRunRequest(w http.ResponseWriter, 
 	_ = p.API.UpdateEphemeralPost(mattermostUserID, alphaPost)
 	response := &model.PostActionIntegrationResponse{}
 	p.returnPostActionIntegrationResponse(w, response)
-}
-
-func (p *Plugin) UpdatePipelineRunApprovalPost(approvalSteps []*serializers.ApprovalSteps, minRequiredApprovers int, status, postID, mattermostUserID string) error {
-	post, err := p.API.GetPost(postID)
-	if err != nil {
-		p.handlePipelineApprovalRequestUpdateError(fmt.Sprintf("Error in fetching post ID: %s", postID), mattermostUserID, err)
-		return err
-	}
-
-	slackAttachment := post.Attachments()[0]
-	noOFApprovalsReached := 0
-
-	approvers := ""
-	for _, pipelineRunApprovalSteps := range approvalSteps {
-		if pipelineRunApprovalSteps.Status != "pending" {
-			approvers += fmt.Sprintf("%s %s \n", constants.PipelineRequestUpdateEmoji[pipelineRunApprovalSteps.Status], pipelineRunApprovalSteps.AssignedApprover.DisplayName)
-			if pipelineRunApprovalSteps.Status == "approved" {
-				noOFApprovalsReached += 1
-			}
-		} else {
-			approvers += pipelineRunApprovalSteps.AssignedApprover.DisplayName + "\n"
-		}
-	}
-
-	slackAttachment.Fields = []*model.SlackAttachmentField{
-		slackAttachment.Fields[0],
-		slackAttachment.Fields[1],
-		{
-			Title: slackAttachment.Fields[2].Title,
-			Value: approvers,
-		},
-	}
-
-	if status != "pending" || noOFApprovalsReached == minRequiredApprovers {
-		slackAttachment.Actions = nil
-	}
-
-	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})
-	if _, err := p.API.UpdatePost(post); err != nil {
-		p.handlePipelineApprovalRequestUpdateError(fmt.Sprintf("Error in fetching post ID: %s", postID), mattermostUserID, err)
-		return err
-	}
-
-	return nil
 }
 
 func (p *Plugin) returnPostActionIntegrationResponse(w http.ResponseWriter, res *model.PostActionIntegrationResponse) {
