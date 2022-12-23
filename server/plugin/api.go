@@ -1014,6 +1014,22 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 				},
 			},
 		}
+	case constants.SubscriptionEventReleaseDeploymentApprovalCompleted:
+		attachment = &model.SlackAttachment{
+			Pretext:    body.Message.Markdown,
+			AuthorName: constants.SlackAttachmentAuthorNamePipelines,
+			AuthorIcon: fmt.Sprintf(constants.StaticFiles, p.GetSiteURL(), constants.PluginID, constants.FileNamePipelinesIcon),
+			Color:      constants.IconColorPipelines,
+			Fields: []*model.SlackAttachmentField{
+				{
+					Title: "Release pipeline",
+					Value: fmt.Sprintf("[%s](%s)", body.Resource.Release.Name, body.Resource.Release.Links.Web.Href),
+					Short: true,
+				},
+			},
+			Footer:     body.Resource.Project.Name,
+			FooterIcon: fmt.Sprintf(constants.StaticFiles, p.GetSiteURL(), constants.PluginID, constants.FileNameProjectIcon),
+		}
 	case constants.SubscriptionEventRunStateChanged:
 		attachment = &model.SlackAttachment{
 			Pretext:    body.Message.Markdown,
@@ -1027,6 +1043,22 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 					Short: true,
 				},
 			},
+		}
+	case constants.SubscriptionEventRunStageApprovalCompleted:
+		attachment = &model.SlackAttachment{
+			Pretext:    body.Message.Markdown,
+			AuthorName: constants.SlackAttachmentAuthorNamePipelines,
+			AuthorIcon: fmt.Sprintf(constants.StaticFiles, p.GetSiteURL(), constants.PluginID, constants.FileNamePipelinesIcon),
+			Color:      constants.IconColorPipelines,
+			Fields: []*model.SlackAttachmentField{
+				{
+					Title: "Pipeline",
+					Value: fmt.Sprintf("[%s](%s)", body.Resource.Pipeline.Name, body.Resource.Pipeline.Links.Web.Href),
+					Short: true,
+				},
+			},
+			Footer:     body.Resource.Project.Name,
+			FooterIcon: fmt.Sprintf(constants.StaticFiles, p.GetSiteURL(), constants.PluginID, constants.FileNameProjectIcon),
 		}
 	}
 
