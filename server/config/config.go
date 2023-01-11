@@ -60,7 +60,7 @@ func (c *Configuration) IsValid() error {
 		return errors.New(constants.EmptyEncryptionSecretError)
 	}
 	if c.WebhookSecret == "" {
-		return errors.New(constants.WebhookSecretError)
+		return errors.New(constants.EmptyWebhookSecretError)
 	}
 
 	return nil

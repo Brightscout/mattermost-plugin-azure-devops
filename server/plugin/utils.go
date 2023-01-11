@@ -343,3 +343,11 @@ func (p *Plugin) GetSubscriptionsForAccessibleChannelsOrProjects(subscriptionLis
 
 	return filteredSubscriptionList, nil
 }
+
+func (p *Plugin) verifyEncodedWebhookSecret(received string) (status int, err error) {
+	if p.Encode([]byte(p.getConfiguration().WebhookSecret)) != received {
+		return http.StatusForbidden, errors.New(constants.ErrorUnauthorisedSubscriptionsWebhookRequest)
+	}
+
+	return 0, nil
+}

@@ -49,7 +49,7 @@
                 "key": "WebhookSecret",
                 "display_name": "Webhook Secret:",
                 "type": "generated",
-                "help_text": "The secret key used to authenticate incoming requests to notification webhook used for subscriptions\nRegenerating the secret will require all users to create new subscriptions as existing ones will no longer be authenticated."
+                "help_text": "The secret key used to authenticate incoming requests to notification webhook used for subscriptions.\nRegenerating the secret will require all users to create new subscriptions as existing ones will no longer be authenticated."
             }
         ]
     }

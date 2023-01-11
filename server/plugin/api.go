@@ -490,9 +490,9 @@ func (p *Plugin) getReviewersListString(reviewersList []serializers.Reviewer) st
 
 func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.Request) {
 	webhookSecret := r.URL.Query().Get(constants.AzureDevopsQueryParamWebhookSecret)
-	if webhookSecret == "" || webhookSecret != p.getConfiguration().WebhookSecret {
-		p.API.LogError(constants.ErrorUnauthorisedSubscriptionsWebhookRequest)
-		p.handleError(w, r, &serializers.Error{Code: http.StatusUnauthorized, Message: constants.ErrorUnauthorisedSubscriptionsWebhookRequest})
+	if status, err := p.verifyEncodedWebhookSecret(webhookSecret); err != nil {
+		p.API.LogError(constants.ErrorUnauthorisedSubscriptionsWebhookRequest, "Error", err.Error())
+		p.handleError(w, r, &serializers.Error{Code: status, Message: constants.ErrorUnauthorisedSubscriptionsWebhookRequest})
 		return
 	}
 

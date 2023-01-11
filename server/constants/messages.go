@@ -31,7 +31,7 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	EmptyAzureDevopsOAuthClientSecretError = "azure devops OAuth client secret should not be empty"
 	EmptyEncryptionSecretError             = "encryption secret should not be empty"
-	WebhookSecretError                     = "webhook secret should not be empty"
+	EmptyWebhookSecretError                = "webhook secret should not be empty"
 	ProjectIDRequired                      = "project ID is required"
 	FiltersRequired                        = "filters required"
 )

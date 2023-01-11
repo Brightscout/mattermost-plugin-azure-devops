@@ -774,7 +774,7 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 		{
 			description:   "SubscriptionNotifications: invalid channel ID",
 			body:          `{}`,
-			err:           errors.New("mockError"),
+			err:           errors.New("invalid channel ID"),
 			channelID:     "mockChannelID",
 			statusCode:    http.StatusBadRequest,
 			webhookSecret: "mockWebhookSecret",
@@ -820,7 +820,7 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 				return testCase.isValidChannelID
 			})
 
-			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/notification?channelID=%s&webhookSecret=%s", testCase.channelID, testCase.webhookSecret), bytes.NewBufferString(testCase.body))
+			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/notification?%s=%s&%s=%s", constants.AzureDevopsQueryParamChannelID, testCase.channelID, constants.AzureDevopsQueryParamWebhookSecret, testCase.webhookSecret), bytes.NewBufferString(testCase.body))
 
 			w := httptest.NewRecorder()
 			p.handleSubscriptionNotifications(w, req)

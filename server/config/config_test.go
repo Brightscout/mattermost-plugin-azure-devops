@@ -24,7 +24,6 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:             "mockEncryptionSecret",
 				WebhookSecret:                "mockWebhookSecret",
 			},
-			errMsg: "",
 		},
 		{
 			description: "configuration: empty AzureDevopsAPIBaseURL",
@@ -79,7 +78,7 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:             "mockEncryptionSecret",
 				WebhookSecret:                "",
 			},
-			errMsg: constants.WebhookSecretError,
+			errMsg: constants.EmptyWebhookSecretError,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
