@@ -822,7 +822,7 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 				return testCase.statusCode, testCase.err
 			})
 
-			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/notification?%s=%s&%s=%s", constants.AzureDevopsQueryParamChannelID, testCase.channelID, constants.AzureDevopsQueryParamWebhookSecret, testCase.webhookSecret), bytes.NewBufferString(testCase.body))
+			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("%s?%s=%s&%s=%s", constants.PathSubscriptionNotifications, constants.AzureDevopsQueryParamChannelID, testCase.channelID, constants.AzureDevopsQueryParamWebhookSecret, testCase.webhookSecret), bytes.NewBufferString(testCase.body))
 
 			w := httptest.NewRecorder()
 			p.handleSubscriptionNotifications(w, req)
