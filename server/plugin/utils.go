@@ -344,8 +344,16 @@ func (p *Plugin) GetSubscriptionsForAccessibleChannelsOrProjects(subscriptionLis
 	return filteredSubscriptionList, nil
 }
 
-func (p *Plugin) verifyEncodedWebhookSecret(received string) (status int, err error) {
-	if p.Encode([]byte(p.getConfiguration().WebhookSecret)) != received {
+func (p *Plugin) verifyEncryptedWebhookSecret(received string) (status int, err error) {
+	decodedWebhookSecret, err := p.Decode(received)
+	if err != nil {
+		return http.StatusInternalServerError, errors.New("failed to decode webhook secret")
+	}
+	decryptedWebhookSecret, err := p.Decrypt([]byte(decodedWebhookSecret), []byte(p.getConfiguration().EncryptionSecret))
+	if err != nil {
+		return http.StatusInternalServerError, errors.New("failed to decrypt webhook secret")
+	}
+	if p.getConfiguration().WebhookSecret != string(decryptedWebhookSecret) {
 		return http.StatusForbidden, errors.New(constants.ErrorUnauthorisedSubscriptionsWebhookRequest)
 	}
 

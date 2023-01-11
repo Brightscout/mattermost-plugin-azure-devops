@@ -139,7 +139,12 @@ func (c *client) callFormURLEncoded(url, path, method string, out interface{}, f
 func (c *client) CreateSubscription(body *serializers.CreateSubscriptionRequestPayload, project *serializers.ProjectDetails, channelID, pluginURL, mattermostUserID string) (*serializers.SubscriptionValue, int, error) {
 	subscriptionURL := fmt.Sprintf(constants.CreateSubscription, body.Organization)
 
-	encodedWebhookSecret := c.plugin.Encode([]byte(c.plugin.getConfiguration().WebhookSecret))
+	encryptedWebhookSecret, err := c.plugin.Encrypt([]byte(c.plugin.getConfiguration().WebhookSecret), []byte(c.plugin.getConfiguration().EncryptionSecret))
+	if err != nil {
+		return nil, http.StatusInternalServerError, errors.Wrap(err, "failed to encrypt webhook secret")
+	}
+	encodedWebhookSecret := c.plugin.Encode(encryptedWebhookSecret)
+
 	consumerInputs := serializers.ConsumerInputs{
 		URL: fmt.Sprintf("%s%s?%s=%s&%s=%s", strings.TrimRight(pluginURL, "/"), constants.PathSubscriptionNotifications, constants.AzureDevopsQueryParamChannelID, channelID, constants.AzureDevopsQueryParamWebhookSecret, encodedWebhookSecret),
 	}
