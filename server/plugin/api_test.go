@@ -765,7 +765,6 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 		{
 			description:      "SubscriptionNotifications: empty body",
 			body:             `{}`,
-			err:              errors.New("mockError"),
 			channelID:        "mockChannelID",
 			isValidChannelID: true,
 			statusCode:       http.StatusOK,
@@ -774,7 +773,6 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 		{
 			description:   "SubscriptionNotifications: invalid channel ID",
 			body:          `{}`,
-			err:           errors.New("invalid channel ID"),
 			channelID:     "mockChannelID",
 			statusCode:    http.StatusBadRequest,
 			webhookSecret: "mockWebhookSecret",
@@ -784,7 +782,6 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 			body: `{
 				"detailedMessage": {
 					"markdown": "mockMarkdown"`,
-			err:              errors.New("mockError"),
 			channelID:        "mockChannelID",
 			isValidChannelID: true,
 			statusCode:       http.StatusBadRequest,
@@ -810,6 +807,7 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 				}`,
 			isValidChannelID: true,
 			statusCode:       http.StatusUnauthorized,
+			err:              errors.New("webhook secret is absent"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -818,6 +816,10 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 
 			monkey.Patch(model.IsValidId, func(string) bool {
 				return testCase.isValidChannelID
+			})
+
+			monkey.PatchInstanceMethod(reflect.TypeOf(p), "VerifyEncryptedWebhookSecret", func(_ *Plugin, _ string) (int, error) {
+				return testCase.statusCode, testCase.err
 			})
 
 			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/notification?%s=%s&%s=%s", constants.AzureDevopsQueryParamChannelID, testCase.channelID, constants.AzureDevopsQueryParamWebhookSecret, testCase.webhookSecret), bytes.NewBufferString(testCase.body))
