@@ -460,6 +460,7 @@ const SubscribeModal = () => {
                                 {
                                     formFields.serviceType === pluginConstants.common.boards && formFields.eventType && Object.keys(eventTypeBoards).includes(formFields.eventType) && (
                                         <BoardsFilter
+                                            isModalOpen={visibility}
                                             organization={formFields.organization as string}
                                             projectId={selectedProjectId || projectID as string}
                                             eventType={formFields.eventType || ''}
@@ -472,6 +473,7 @@ const SubscribeModal = () => {
                                 {
                                     formFields.serviceType === pluginConstants.common.repos && formFields.eventType && Object.keys(eventTypeRepos).includes(formFields.eventType) && (
                                         <ReposFilter
+                                            isModalOpen={visibility}
                                             organization={formFields.organization as string}
                                             projectId={selectedProjectId || projectID as string}
                                             eventType={formFields.eventType || ''}
@@ -496,6 +498,7 @@ const SubscribeModal = () => {
                                 {
                                     formFields.serviceType === pluginConstants.common.pipelines && formFields.eventType && Object.keys(eventTypePipelines).includes(formFields.eventType) && (
                                         <PipelinesFilter
+                                            isModalOpen={visibility}
                                             organization={organization as string}
                                             projectId={projectID as string}
                                             eventType={formFields.eventType || ''}

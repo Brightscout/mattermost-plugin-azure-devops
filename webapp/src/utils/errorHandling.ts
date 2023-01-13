@@ -17,6 +17,9 @@ const getErrorMessage = (
         if (errorState?.status === 403 && errorState?.data.Error.includes(pluginConstants.messages.error.accessDenied)) {
             return pluginConstants.messages.error.adminAccessError;
         }
+        if (errorState?.status === 500 && errorState?.data.Error.includes(pluginConstants.messages.error.failedToGetSubscriptions)) {
+            return pluginConstants.messages.error.failedToGetSubscriptions;
+        }
         return errorState?.data.Error ?? pluginConstants.messages.error.generic;
 
     case 'LinkProjectModal':
