@@ -41,6 +41,10 @@ func setupMockPlugin(api *plugintest.API, store *mocks.MockKVStore, client *mock
 		p.Store = store
 	}
 
+	p.setConfiguration(&config.Configuration{
+		WebhookSecret: "mockWebhookSecret",
+	})
+
 	if client != nil {
 		p.Client = client
 	}
@@ -738,9 +742,6 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 	defer monkey.UnpatchAll()
 	mockAPI := &plugintest.API{}
 	p := setupMockPlugin(mockAPI, nil, nil)
-	p.setConfiguration(&config.Configuration{
-		WebhookSecret: "mockWebhookSecret",
-	})
 	for _, testCase := range []struct {
 		description      string
 		body             string
