@@ -96,7 +96,7 @@ const PipelinesFilter = ({
     }), [organization, projectId, eventType, subscriptionFiltersForPipelines, selectedBuildPipeline, selectedReleasePipeline, selectedRunPipeline]);
 
     useEffect(() => {
-        if (eventType) {
+        if (organization && projectId && eventType) {
             makeApiRequestWithCompletionStatus(
                 pluginConstants.pluginApiServiceConfigs.getSubscriptionFilters.apiServiceName,
                 getSubscriptionFiltersRequest,

@@ -15,4 +15,6 @@ export const error = {
     notAccessibleError: 'Looks like this project/organization does not exist or you do not have permissions to access it',
     adminAccessErrorForUnlinking: 'You do not have sufficient permissions to delete subscriptions for this project but you can still unlink the project',
     projectAlreadyLinkedError: 'This project is already linked.',
+    errorExpectedForOauthNotEnabled: 'failed to link Project: status: 401 Unauthorized',
+    errorMessageOauthNotEnabled: 'Looks like "third-party application access via OAuth" setting is not enabled for the organization or you do not have sufficient permissions to access it',
 };
