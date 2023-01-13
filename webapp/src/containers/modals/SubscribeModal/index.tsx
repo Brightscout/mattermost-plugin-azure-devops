@@ -219,11 +219,18 @@ const SubscribeModal = () => {
 
     // Set organization, project and channel list values
     useEffect(() => {
+        let isCurrentChannelIdPresentInChannelList = false; // Check if the current channel ID is the ID of a channel and not DM or group
         if (isChannelListSuccess && !showResultPanel) {
-            setChannelOptions(channelList?.map((channel) => ({
-                label: <span><i className={`icon ${channel.type === mm_constants.PRIVATE_CHANNEL ? 'icon-lock-outline' : 'icon-globe'} dropdown-option-icon`}/>{channel.display_name}</span>,
-                value: channel.id,
-            })));
+            setChannelOptions(channelList?.map((channel) => {
+                if (currentChannelId === channel.id) {
+                    isCurrentChannelIdPresentInChannelList = true;
+                }
+
+                return ({
+                    label: <span><i className={`icon ${channel.type === mm_constants.PRIVATE_CHANNEL ? 'icon-lock-outline' : 'icon-globe'} dropdown-option-icon`}/>{channel.display_name}</span>,
+                    value: channel.id,
+                });
+            }));
         }
 
         // Pre-select the dropdown value in case of single option
@@ -231,7 +238,7 @@ const SubscribeModal = () => {
             const autoSelectedValues: Pick<Record<FormFieldNames, string>, 'organization' | 'project' | 'channelID'> = {
                 organization: organization ?? '',
                 project: project ?? '',
-                channelID: currentChannelId ?? '',
+                channelID: isCurrentChannelIdPresentInChannelList ? currentChannelId : '' ?? '',
             };
 
             if (!organization && organizationList.length === 1) {
