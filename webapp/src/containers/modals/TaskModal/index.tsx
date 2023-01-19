@@ -212,7 +212,7 @@ const TaskModal = () => {
             title='Create New Work Item'
             onHide={resetModalState}
             onConfirm={isAnyProjectLinked ? onConfirm : null}
-            confirmBtnText='Create new task'
+            confirmBtnText='Create New Work Item'
             loading={isLoading}
             confirmDisabled={isLoading}
             error={showApiErrorMessages(isError, error as ApiErrorResponse)}
