@@ -26,8 +26,8 @@ const getErrorMessage = (
         if (errorState?.status === 404 || errorState?.status === 401) {
             return pluginConstants.messages.error.notAccessibleError;
         }
-        if (errorState?.status === 500 && errorState?.data.Error.includes(pluginConstants.messages.error.errorExpectedForOauthNotEnabled)) {
-            return pluginConstants.messages.error.errorMessageOauthNotEnabled;
+        if (errorState?.status === 500 && errorState?.data.Error.includes(pluginConstants.messages.error.errorExpectedForOAuthNotEnabled)) {
+            return pluginConstants.messages.error.errorMessageOAuthNotEnabled;
         }
         return errorState?.data.Error ?? pluginConstants.messages.error.generic;
 
