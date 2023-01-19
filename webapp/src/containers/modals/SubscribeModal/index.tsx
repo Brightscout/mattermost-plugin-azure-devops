@@ -219,7 +219,7 @@ const SubscribeModal = () => {
 
     // Set organization, project and channel list values
     useEffect(() => {
-        let isCurrentChannelIdPresentInChannelList = false; // Check if the current channel ID is the ID of a channel and not DM or group
+        let isCurrentChannelIdPresentInChannelList = false; // Check if the current channel ID is the ID of a public or private channel and not the ID of a DM or group channel
         if (isChannelListSuccess && !showResultPanel) {
             setChannelOptions(channelList?.map((channel) => {
                 if (currentChannelId === channel.id) {
@@ -238,7 +238,7 @@ const SubscribeModal = () => {
             const autoSelectedValues: Pick<Record<FormFieldNames, string>, 'organization' | 'project' | 'channelID'> = {
                 organization: organization ?? '',
                 project: project ?? '',
-                channelID: isCurrentChannelIdPresentInChannelList ? currentChannelId : '' ?? '',
+                channelID: isCurrentChannelIdPresentInChannelList && currentChannelId ? currentChannelId : '',
             };
 
             if (!organization && organizationList.length === 1) {

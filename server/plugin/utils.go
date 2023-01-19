@@ -454,7 +454,7 @@ func (p *Plugin) UpdatePipelineRunApprovalPost(approvalSteps []*serializers.Appr
 }
 
 func (p *Plugin) deleteSubscription(subscription *serializers.SubscriptionDetails, mattermostUserID string) (int, error) {
-	// On deletion if a subscription is not found on the Azure DevOps portal then delete it from the Mattermost's KV store
+	// On deletion, if a subscription is not found on the Azure DevOps portal then delete it from Mattermost's KV store
 	if statusCode, err := p.Client.DeleteSubscription(subscription.OrganizationName, subscription.SubscriptionID, mattermostUserID); statusCode != http.StatusNotFound && err != nil {
 		return statusCode, err
 	}
