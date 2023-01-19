@@ -209,7 +209,7 @@ const TaskModal = () => {
     return (
         <Modal
             show={visibility}
-            title='Create New Task'
+            title='Create New Work Item'
             onHide={resetModalState}
             onConfirm={isAnyProjectLinked ? onConfirm : null}
             confirmBtnText='Create new task'

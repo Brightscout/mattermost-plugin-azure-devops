@@ -82,10 +82,12 @@ func (p *Plugin) getAutoCompleteData() *model.AutocompleteData {
 	subscription.AddCommand(subscriptionDelete)
 
 	boards := model.NewAutocompleteData(constants.CommandBoards, "", "Create a new work-item or add/list/delete board subscriptions")
+	workitem := model.NewAutocompleteData(constants.CommandWorkitem, "", "Create a new work-item")
 	create := model.NewAutocompleteData(constants.CommandCreate, "", "Create a new work-item")
 	create.AddTextArgument("Title", "[title]", "")
 	create.AddTextArgument("Description", "[description]", "")
-	boards.AddCommand(create)
+	workitem.AddCommand(create)
+	boards.AddCommand(workitem)
 	boards.AddCommand(subscription)
 	azureDevops.AddCommand(boards)
 
@@ -131,7 +133,7 @@ func azureDevopsBoardsCommand(p *Plugin, c *plugin.Context, commandArgs *model.C
 
 	// Validate commands and their arguments
 	switch {
-	case len(args) >= 1 && args[0] == constants.CommandCreate:
+	case len(args) >= 1 && args[0] == constants.CommandWorkitem && args[1] == constants.CommandCreate:
 		return &model.CommandResponse{}, nil
 		// For "subscription" command there must be at least 2 arguments
 	case len(args) >= 2 && args[0] == constants.CommandSubscription:
