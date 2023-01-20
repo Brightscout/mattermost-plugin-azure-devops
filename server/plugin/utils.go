@@ -454,7 +454,7 @@ func (p *Plugin) UpdatePipelineRunApprovalPost(approvalSteps []*serializers.Appr
 }
 
 func (p *Plugin) deleteSubscription(subscription *serializers.SubscriptionDetails, mattermostUserID string) (int, error) {
-	// On deletion if a subscription is not found on the Azure DevOps portal then delete it from the Mattermost's KV store
+	// On deletion, if a subscription is not found on the Azure DevOps portal then delete it from Mattermost's KV store
 	if statusCode, err := p.Client.DeleteSubscription(subscription.OrganizationName, subscription.SubscriptionID, mattermostUserID); statusCode != http.StatusNotFound && err != nil {
 		return statusCode, err
 	}
@@ -464,4 +464,22 @@ func (p *Plugin) deleteSubscription(subscription *serializers.SubscriptionDetail
 	}
 
 	return http.StatusOK, nil
+}
+
+func (p *Plugin) VerifyEncryptedWebhookSecret(received string) (status int, err error) {
+	decodedWebhookSecret, err := p.Decode(received)
+	if err != nil {
+		return http.StatusInternalServerError, errors.New("failed to decode webhook secret")
+	}
+
+	decryptedWebhookSecret, err := p.Decrypt(decodedWebhookSecret, []byte(p.getConfiguration().EncryptionSecret))
+	if err != nil {
+		return http.StatusInternalServerError, errors.New("failed to decrypt webhook secret")
+	}
+
+	if p.getConfiguration().WebhookSecret != string(decryptedWebhookSecret) {
+		return http.StatusForbidden, errors.New(constants.ErrorUnauthorisedSubscriptionsWebhookRequest)
+	}
+
+	return 0, nil
 }
