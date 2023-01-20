@@ -32,7 +32,7 @@ const SubscriptionCard = ({handleDeleteSubscrption, subscriptionDetails: {channe
                         >
                             {pluginConstants.common.serviceTypeIcon[serviceType].icon}
                         </SVGWrapper>
-                        <p className={`ml-1 mb-0 font-bold color-${serviceType} text-capitalize`}>{serviceType}</p>
+                        <p className='ml-1 mb-0 font-bold text-capitalize'>{serviceType}</p>
                     </div>
                     <div className='button-wrapper'>
                         <IconButton
@@ -45,16 +45,7 @@ const SubscriptionCard = ({handleDeleteSubscrption, subscriptionDetails: {channe
                 </div>
                 <div className='project-details'>
                     <LabelValuePair
-                        label={
-                            <SVGWrapper
-                                width={12}
-                                height={12}
-                                viewBox='0 0 10 10'
-                            >
-                                {pluginConstants.SVGIcons.workEvent}
-                            </SVGWrapper>
-                        }
-                        labelExtraClassName='margin-left-5'
+                        labelIconClassName='icon azure-devops-icon azure-devops-icon-event icon-event-type'
                         value={pluginConstants.common.eventTypeMap[eventType as EventType] ?? ''}
                     />
                     <LabelValuePair
@@ -69,13 +60,7 @@ const SubscriptionCard = ({handleDeleteSubscrption, subscriptionDetails: {channe
                         showFilter && (
                             <div className='d-flex align-item-center margin-left-5'>
                                 <div className='card-filter'>
-                                    <SVGWrapper
-                                        width={14}
-                                        height={14}
-                                        viewBox='0 0 12 12'
-                                    >
-                                        {pluginConstants.SVGIcons.cardFilter}
-                                    </SVGWrapper>
+                                    <i className='azure-devops-icon azure-devops-icon-filter'/>
                                 </div>
                                 <div className='card-chip-wrapper'>
                                     {
