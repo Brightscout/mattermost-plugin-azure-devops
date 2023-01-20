@@ -3,7 +3,7 @@
     "name": "Azure DevOps",
     "description": "This plugin provides services of Azure DevOps such as Boards and Repos",
     "icon_path": "public/assets/azurebot.svg",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "min_server_version": "5.37.0",
     "server": {
         "executables": {
