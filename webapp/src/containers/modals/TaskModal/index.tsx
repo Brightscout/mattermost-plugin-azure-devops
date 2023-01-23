@@ -73,11 +73,13 @@ const TaskModal = () => {
     }), [formFields.organization, formFields.project, subscriptionFiltersForBoards, selectedProjectId]);
 
     useEffect(() => {
-        makeApiRequestWithCompletionStatus(
-            pluginConstants.pluginApiServiceConfigs.getSubscriptionFilters.apiServiceName,
-            getAreaPathValuesRequest,
-        );
-    }, [getAreaPathValuesRequest]);
+        if (visibility && getAreaPathValuesRequest.organization && getAreaPathValuesRequest.projectId) {
+            makeApiRequestWithCompletionStatus(
+                pluginConstants.pluginApiServiceConfigs.getSubscriptionFilters.apiServiceName,
+                getAreaPathValuesRequest,
+            );
+        }
+    }, [visibility, getAreaPathValuesRequest]);
 
     const {data: areaPathData, isLoading: isAreaPathLoading, isError: isAreaPathError, isSuccess: isAreaPathSuccess} = getApiState(
         pluginConstants.pluginApiServiceConfigs.getSubscriptionFilters.apiServiceName,

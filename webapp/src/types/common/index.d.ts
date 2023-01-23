@@ -138,3 +138,9 @@ type SubscriptionFilters = {
     serviceType: string,
     eventType: string,
 }
+
+type LabelIconProps = {
+    className: string
+    tooltipText: string
+    extraClassName?: string
+}
