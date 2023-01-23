@@ -211,10 +211,10 @@ const TaskModal = () => {
     return (
         <Modal
             show={visibility}
-            title='Create New Task'
+            title='Create New Work Item'
             onHide={resetModalState}
             onConfirm={isAnyProjectLinked ? onConfirm : null}
-            confirmBtnText='Create new task'
+            confirmBtnText='Create New Work Item'
             loading={isLoading}
             confirmDisabled={isLoading}
             error={showApiErrorMessages(isError, error as ApiErrorResponse)}
