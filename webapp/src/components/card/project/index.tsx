@@ -20,8 +20,8 @@ const ProjectCard = ({onProjectTitleClick, projectDetails: {organizationName, pr
             <div className='project-details'>
                 <LabelValuePair
                     label={
-                        <Tooltip tooltipContent={'Project'}>
-                            <i aria-hidden="true">
+                        <Tooltip tooltipContent='Project'>
+                            <i aria-hidden='true'>
                                 <SVGWrapper
                                     width={16}
                                     height={16}
@@ -39,8 +39,8 @@ const ProjectCard = ({onProjectTitleClick, projectDetails: {organizationName, pr
                 />
                 <LabelValuePair
                     label={
-                        <Tooltip tooltipContent={'Organization'}>
-                            <i aria-hidden="true">
+                        <Tooltip tooltipContent='Organization'>
+                            <i aria-hidden='true'>
                                 <SVGWrapper
                                     width={13}
                                     height={13}
