@@ -864,6 +864,7 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 			description: "SubscriptionNotifications: eventType workItem created",
 			body: `{
 				"eventType": "workitem.created",
+				"resource": {"fields": {"System.Title": "mockTitle", "System.TeamProject": "mockProject"}},
 				"detailedMessage": {
 					"markdown": "mockMarkdown"
 					}
