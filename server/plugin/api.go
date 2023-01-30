@@ -265,6 +265,12 @@ func (p *Plugin) handleCreateSubscription(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if err := p.CheckIfUserCanAccessChannel(body.ChannelID, mattermostUserID); err != nil {
+		p.API.LogError(constants.ErrorCreateSubscription, "Error", err.Error())
+		p.handleError(w, r, &serializers.Error{Code: http.StatusForbidden, Message: "You are not allowed to create subscription for the provided channel ID"})
+		return
+	}
+
 	projectList, err := p.Store.GetAllProjects(mattermostUserID)
 	if err != nil {
 		p.API.LogError(constants.ErrorFetchProjectList, "Error", err.Error())

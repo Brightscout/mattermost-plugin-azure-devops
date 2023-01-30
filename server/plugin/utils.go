@@ -483,3 +483,11 @@ func (p *Plugin) VerifyEncryptedWebhookSecret(received string) (status int, err 
 
 	return 0, nil
 }
+
+func (p *Plugin) CheckIfUserCanAccessChannel(channelID, userID string) error {
+	if _, err := p.API.GetChannelMember(channelID, userID); err != nil {
+		return err
+	}
+
+	return nil
+}
