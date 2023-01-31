@@ -268,10 +268,10 @@ func (p *Plugin) handleCreateSubscription(w http.ResponseWriter, r *http.Request
 	if statusCode, channelAccessErr := p.CheckValidChannelForSubscription(body.ChannelID, mattermostUserID); channelAccessErr != nil {
 		p.API.LogError(constants.ErrorCreateSubscription, "Error", channelAccessErr.Error())
 
-		message := err.Error()
+		message := channelAccessErr.Error()
 		responseStatusCode := statusCode
 		if statusCode == http.StatusNotFound {
-			message = "You are not allowed to create subscription for the provided channel"
+			message = "you are not allowed to create subscription for the provided channel"
 			responseStatusCode = http.StatusForbidden
 		}
 
