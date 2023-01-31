@@ -485,19 +485,19 @@ func (p *Plugin) VerifyEncryptedWebhookSecret(received string) (status int, err 
 }
 
 // A user can create subscription(s) only for accessible public and private channels
-func (p *Plugin) CheckValidChannelForSubscription(channelID, userID string) error {
+func (p *Plugin) CheckValidChannelForSubscription(channelID, userID string) (int, error) {
 	channel, err := p.API.GetChannel(channelID)
 	if err != nil {
-		return err
+		return err.StatusCode, err
 	}
 
-	if channel.Type == constants.ChannelTypeGroup || channel.Type == constants.ChannelTypeDM {
-		return errors.New("subscription can not be created for a group or direct message channel")
+	if channel.Type != model.CHANNEL_PRIVATE && channel.Type != model.CHANNEL_OPEN {
+		return http.StatusForbidden, errors.New("subscription can only be created for a public or private channel")
 	}
 
 	if _, err := p.API.GetChannelMember(channelID, userID); err != nil {
-		return err
+		return err.StatusCode, err
 	}
 
-	return nil
+	return 0, nil
 }

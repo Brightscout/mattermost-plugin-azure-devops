@@ -170,10 +170,6 @@ const (
 	PipelineRequestContextProjectID    = "projectId"
 
 	DialogFieldNameComment = "comment"
-
-	// Channel types
-	ChannelTypeGroup = "G"
-	ChannelTypeDM    = "D"
 )
 
 var (
