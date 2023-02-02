@@ -289,7 +289,7 @@ func (p *Plugin) handleCreateSubscription(w http.ResponseWriter, r *http.Request
 		ProjectName:      body.Project,
 		ChannelID:        body.ChannelID,
 		EventType:        body.EventType,
-		// Below all are filters that could be present on different category of subscriptions from Boards, Repos and Pipelines
+		// Below all are filters that could be present on different categories of subscriptions from Boards, Repos and Pipelines
 		Repository:                   body.Repository,
 		TargetBranch:                 body.TargetBranch,
 		PullRequestCreatedBy:         body.PullRequestCreatedBy,
@@ -356,7 +356,7 @@ func (p *Plugin) handleCreateSubscription(w http.ResponseWriter, r *http.Request
 		ChannelName:      channel.DisplayName,
 		ChannelType:      channel.Type,
 		CreatedBy:        strings.TrimSpace(createdByDisplayName),
-		// Below all are filters that could be present on different category of subscriptions from Boards, Repos and Pipelines
+		// Below all are filters that could be present on different categories of subscriptions from Boards, Repos and Pipelines
 		Repository:                       body.Repository,
 		TargetBranch:                     body.TargetBranch,
 		RepositoryName:                   body.RepositoryName,

@@ -165,7 +165,7 @@ type SubscriptionDetails struct {
 	SubscriptionID   string    `json:"subscriptionID"`
 	CreatedBy        string    `json:"createdBy"`
 	CreatedAt        time.Time `json:"createdAt"`
-	// Below all are filters that could be present on different category of subscriptions from Boards, Repos and Pipelines
+	// Below all are filters that could be present on different categories of subscriptions from Boards, Repos and Pipelines
 	TargetBranch                     string `json:"targetBranch"`
 	Repository                       string `json:"repository"`
 	RepositoryName                   string `json:"repositoryName"`
