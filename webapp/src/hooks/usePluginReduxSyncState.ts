@@ -15,9 +15,9 @@ import useApiRequestCompletionState from 'hooks/useApiRequestCompletionState';
 /**
  * This hook intercepts the redux changes for the plugin to perform common actions like
  * checking if the user's account is connected
- * closing any open modal if user is logged out from other client tab
- * preventing opening a modal if user's account is not connected
- * fetching linked project list whenever needed like RHS is opened, new project is linked, etc
+ * closing any open modal if the user is logged out from another client tab
+ * preventing opening a modal if the user's account is not connected
+ * fetching linked project list on the opening of RHS, on linking of a new project, etc
  */
 function usePluginReduxSyncState() {
     const {state, makeApiRequestWithCompletionStatus} = usePluginApi();
