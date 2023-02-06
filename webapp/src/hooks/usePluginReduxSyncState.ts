@@ -61,15 +61,13 @@ function usePluginReduxSyncState() {
                 dispatch(toggleShowTaskModal({isVisible: true, commandArgs}));
             }
         }
-    }, [modalId, isConnected]);
 
-    useEffect(() => {
         if (!isConnected) {
             dispatch(toggleShowLinkModal({isVisible: false, commandArgs}));
             dispatch(toggleShowSubscribeModal({isVisible: false, commandArgs}));
             dispatch(toggleShowTaskModal({isVisible: false, commandArgs}));
         }
-    }, [isConnected]);
+    }, [modalId, isConnected]);
 
     useEffect(() => {
         dispatch(resetGlobalModalState());
