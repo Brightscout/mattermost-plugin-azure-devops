@@ -19,7 +19,7 @@ const (
 	NoProjectLinked                                = "No project is linked, please link a project."
 	PipelinesRequestBeingProcessed                 = "Your approval/rejection request is being processed."
 	PipelinesRequestProcessed                      = "Your approval/rejection request is processed."
-	ErrorMessageAzureDevopsAccountAlreadyConnected = "Azure DevOps account for %s is already connected"
+	ErrorMessageAzureDevopsAccountAlreadyConnected = "azure devops account for %s is already connected"
 
 	// Validations Errors
 	OrganizationRequired            = "organization is required"
