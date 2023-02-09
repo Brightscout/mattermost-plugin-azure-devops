@@ -108,6 +108,12 @@ func (p *Plugin) OAuthComplete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := p.GenerateOAuthToken(code, state); err != nil {
+		if strings.Contains(err.Error(), constants.ErrorMessageAzureDevopsAccountAlreadyConnected) {
+			p.API.LogError(constants.UnableToCompleteOAuth, "Error", constants.ErrorMessageAzureDevopsAccountAlreadyConnected)
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+		p.API.LogError(constants.UnableToCompleteOAuth, "Error", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

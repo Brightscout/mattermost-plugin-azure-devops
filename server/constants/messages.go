@@ -49,6 +49,7 @@ const (
 	UnableToDisconnectUser                       = "Unable to disconnect user"
 	UnableToCheckIfAlreadyConnected              = "Unable to check if user account is already connected"
 	UnableToStoreOauthState                      = "Unable to store oAuth state for the userID %s"
+	UnableToCompleteOAuth                        = "Unable to complete oAuth"
 	AuthAttemptExpired                           = "Authentication attempt expired, please try again"
 	InvalidAuthState                             = "Invalid oauth state, please try again"
 	GetProjectListError                          = "Error in getting project list"

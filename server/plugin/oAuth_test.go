@@ -130,12 +130,20 @@ func TestOAuthComplete(t *testing.T) {
 			oAuthTokenErr: errors.New("oAuthTokenErr"),
 			statusCode:    http.StatusInternalServerError,
 		},
+		{
+			description:   "OAuthComplete: Azure DevOps user is already connected",
+			code:          "mockCode",
+			state:         "mock_State",
+			oAuthTokenErr: errors.New(constants.ErrorMessageAzureDevopsAccountAlreadyConnected),
+			statusCode:    http.StatusForbidden,
+		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GenerateOAuthToken", func(_ *Plugin, _, _ string) error {
 				return testCase.oAuthTokenErr
 			})
 			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "CloseBrowserWindowWithHTTPResponse", func(_ *Plugin, _ http.ResponseWriter) {})
+			mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 
 			req := httptest.NewRequest(http.MethodGet, "/oauth/complete", bytes.NewBufferString(`{}`))
 			q := req.URL.Query()
