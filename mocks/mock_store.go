@@ -151,19 +151,34 @@ func (mr *MockKVStoreMockRecorder) GetSubscriptionList() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscriptionList", reflect.TypeOf((*MockKVStore)(nil).GetSubscriptionList))
 }
 
-// LoadUser mocks base method
-func (m *MockKVStore) LoadUser(arg0 string) (*serializers.User, error) {
+// LoadAzureDevopsUserIdFromMattermostUser mocks base method
+func (m *MockKVStore) LoadAzureDevopsUserIdFromMattermostUser(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LoadUser", arg0)
+	ret := m.ctrl.Call(m, "LoadAzureDevopsUserIdFromMattermostUser", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadAzureDevopsUserIdFromMattermostUser indicates an expected call of LoadAzureDevopsUserIdFromMattermostUser
+func (mr *MockKVStoreMockRecorder) LoadAzureDevopsUserIdFromMattermostUser(arg0 string) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadAzureDevopsUserIdFromMattermostUser", reflect.TypeOf((*MockKVStore)(nil).LoadAzureDevopsUserIdFromMattermostUser), arg0)
+}
+
+// LoadAzureDevopsUserDetails mocks base method
+func (m *MockKVStore) LoadAzureDevopsUserDetails(arg0 string) (*serializers.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadAzureDevopsUserDetails", arg0)
 	ret0, _ := ret[0].(*serializers.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// LoadUser indicates an expected call of LoadUser
-func (mr *MockKVStoreMockRecorder) LoadUser(arg0 interface{}) *gomock.Call {
+// LoadAzureDevopsUserDetails indicates an expected call of LoadAzureDevopsUserDetails
+func (mr *MockKVStoreMockRecorder) LoadAzureDevopsUserDetails(arg0 string) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadUser", reflect.TypeOf((*MockKVStore)(nil).LoadUser), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadAzureDevopsUserDetails", reflect.TypeOf((*MockKVStore)(nil).LoadAzureDevopsUserDetails), arg0)
 }
 
 // StoreOAuthState mocks base method
@@ -208,18 +223,18 @@ func (mr *MockKVStoreMockRecorder) StoreSubscription(arg0 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreSubscription", reflect.TypeOf((*MockKVStore)(nil).StoreSubscription), arg0)
 }
 
-// StoreUser mocks base method
-func (m *MockKVStore) StoreUser(arg0 *serializers.User) error {
+// StoreAzureDevopsUserDetailsWithMattermostUserId mocks base method
+func (m *MockKVStore) StoreAzureDevopsUserDetailsWithMattermostUserId(arg0 *serializers.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "StoreUser", arg0)
+	ret := m.ctrl.Call(m, "StoreAzureDevopsUserDetailsWithMattermostUserId", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// StoreUser indicates an expected call of StoreUser
-func (mr *MockKVStoreMockRecorder) StoreUser(arg0 interface{}) *gomock.Call {
+// StoreAzureDevopsUserDetailsWithMattermostUserId indicates an expected call of StoreAzureDevopsUserDetailsWithMattermostUserId
+func (mr *MockKVStoreMockRecorder) StoreAzureDevopsUserDetailsWithMattermostUserId(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreUser", reflect.TypeOf((*MockKVStore)(nil).StoreUser), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreAzureDevopsUserDetailsWithMattermostUserId", reflect.TypeOf((*MockKVStore)(nil).StoreAzureDevopsUserDetailsWithMattermostUserId), arg0)
 }
 
 // VerifyOAuthState mocks base method

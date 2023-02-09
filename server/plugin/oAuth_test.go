@@ -61,7 +61,7 @@ func TestOAuthConnect(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "UserAlreadyConnected", func(_ *Plugin, _ string) bool {
+			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "MattermostUserAlreadyConnected", func(_ *Plugin, _ string) bool {
 				return testCase.isConnected
 			})
 			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GenerateOAuthConnectURL", func(_ *Plugin, _ string) string {
@@ -304,6 +304,8 @@ func TestGenerateAndStoreOAuthToken(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			mockedClient.EXPECT().GenerateOAuthToken(gomock.Any()).Return(&serializers.OAuthSuccessResponse{}, 200, nil)
+			mockedClient.EXPECT().GetUserProfile("me", "").Return(&serializers.UserProfile{}, 200, nil)
+			mockedStore.EXPECT().LoadAzureDevopsUserDetails("").Return(&serializers.User{}, nil)
 
 			monkey.Patch(strconv.Atoi, func(string) (int, error) {
 				return 0, nil
@@ -320,7 +322,7 @@ func TestGenerateAndStoreOAuthToken(t *testing.T) {
 			})
 
 			if testCase.storeError == nil {
-				mockedStore.EXPECT().StoreUser(&serializers.User{
+				mockedStore.EXPECT().StoreAzureDevopsUserDetailsWithMattermostUserId(&serializers.User{
 					ExpiresAt: time.Now().UTC().Add(time.Second * time.Duration(0)).Unix(),
 				}).Return(testCase.storeUserError)
 			}
@@ -368,8 +370,8 @@ func TestIsAccessTokenExpired(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
-
-			mockedStore.EXPECT().LoadUser("mockMattermostUserID").Return(&serializers.User{}, testCase.loadUserError)
+			mockedStore.EXPECT().LoadAzureDevopsUserIdFromMattermostUser(testutils.MockMattermostUserID).Return(testutils.MockAzureDevopsUserID, nil)
+			mockedStore.EXPECT().LoadAzureDevopsUserDetails(testutils.MockAzureDevopsUserID).Return(&serializers.User{}, nil)
 
 			p.setConfiguration(
 				&config.Configuration{
@@ -403,20 +405,21 @@ func TestUserAlreadyConnected(t *testing.T) {
 		loadUserError error
 	}{
 		{
-			description: "UserAlreadyConnected: valid",
+			description: "MattermostUserAlreadyConnected: valid",
 			user:        &serializers.User{},
 		},
 		{
-			description:   "UserAlreadyConnected: user is not loaded successfully",
+			description:   "MattermostUserAlreadyConnected: user is not loaded successfully",
 			loadUserError: errors.New("error loading user"),
 		},
 	} {
 		mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return(nil)
 
-		mockedStore.EXPECT().LoadUser("mockMattermostUserID").Return(testCase.user, testCase.loadUserError)
+		mockedStore.EXPECT().LoadAzureDevopsUserIdFromMattermostUser(testutils.MockMattermostUserID).Return(testutils.MockAzureDevopsUserID, nil)
+		mockedStore.EXPECT().LoadAzureDevopsUserDetails(testutils.MockAzureDevopsUserID).Return(&serializers.User{}, nil)
 
 		t.Run(testCase.description, func(t *testing.T) {
-			resp := p.UserAlreadyConnected(testutils.MockMattermostUserID)
+			resp := p.MattermostUserAlreadyConnected(testutils.MockMattermostUserID)
 			assert.NotNil(t, resp)
 		})
 	}

@@ -73,13 +73,13 @@ func (p *Plugin) OAuthConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if isConnected := p.UserAlreadyConnected(mattermostUserID); isConnected {
+	if isConnected := p.MattermostUserAlreadyConnected(mattermostUserID); isConnected {
 		p.CloseBrowserWindowWithHTTPResponse(w)
-		if _, DMErr := p.DM(mattermostUserID, constants.UserAlreadyConnected, false); DMErr != nil {
+		if _, DMErr := p.DM(mattermostUserID, constants.MattermostUserAlreadyConnected, false); DMErr != nil {
 			p.handleError(w, r, &serializers.Error{Code: http.StatusInternalServerError, Message: DMErr.Error()})
 			return
 		}
-		p.handleError(w, r, &serializers.Error{Code: http.StatusBadRequest, Message: constants.UserAlreadyConnected})
+		p.handleError(w, r, &serializers.Error{Code: http.StatusBadRequest, Message: constants.MattermostUserAlreadyConnected})
 		return
 	}
 
@@ -190,6 +190,30 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 		return errors.Wrap(err, "failed to generate oAuth token")
 	}
 
+	userProfile, _, err := p.Client.GetUserProfile("me", successResponse.AccessToken)
+	if err != nil {
+		if _, DMErr := p.DM(mattermostUserID, constants.GenericErrorMessage, false); DMErr != nil {
+			return DMErr
+		}
+		return errors.Wrap(err, "failed to fetch user profile")
+	}
+
+	azureDevopsUser, err := p.Store.LoadAzureDevopsUserDetails(userProfile.ID)
+	if err != nil {
+		if _, DMErr := p.DM(mattermostUserID, constants.GenericErrorMessage, false); DMErr != nil {
+			return DMErr
+		}
+		return errors.Wrap(err, "failed to get user details")
+	}
+
+	if azureDevopsUser.AccessToken != "" {
+		if _, DMErr := p.DM(mattermostUserID, fmt.Sprintf(constants.ErrorMessageAzureDevopsAccountAlreadyConnected, userProfile.Email), false); DMErr != nil {
+			return errors.Wrap(err, "failed to DM user")
+		}
+
+		return errors.New(fmt.Sprintf(constants.ErrorMessageAzureDevopsAccountAlreadyConnected, userProfile.Email))
+	}
+
 	encryptedAccessToken, err := p.Encrypt([]byte(successResponse.AccessToken), []byte(p.getConfiguration().EncryptionSecret))
 	if err != nil {
 		return err
@@ -213,9 +237,10 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 		AccessToken:      p.Encode(encryptedAccessToken),
 		RefreshToken:     p.Encode(encryptedRefreshToken),
 		ExpiresAt:        time.Now().UTC().Add(time.Second * time.Duration(tokenExpiryDurationInSeconds)).Unix(),
+		UserProfile:      *userProfile,
 	}
 
-	if err := p.Store.StoreUser(&user); err != nil {
+	if err := p.Store.StoreAzureDevopsUserDetailsWithMattermostUserId(&user); err != nil {
 		return err
 	}
 
@@ -224,7 +249,13 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 
 // IsAccessTokenExpired checks if a user's access token is expired
 func (p *Plugin) IsAccessTokenExpired(mattermostUserID string) (bool, string) {
-	user, err := p.Store.LoadUser(mattermostUserID)
+	azureDevopsUserId, err := p.Store.LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID)
+	if err != nil {
+		p.API.LogError(constants.ErrorLoadingUserData, "Error", err.Error())
+		return false, ""
+	}
+
+	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserId)
 	if err != nil {
 		p.API.LogError(constants.ErrorLoadingUserData, "Error", err.Error())
 		return false, ""
@@ -239,9 +270,15 @@ func (p *Plugin) IsAccessTokenExpired(mattermostUserID string) (bool, string) {
 	return false, ""
 }
 
-// UserAlreadyConnected checks if a user is already connected
-func (p *Plugin) UserAlreadyConnected(mattermostUserID string) bool {
-	user, err := p.Store.LoadUser(mattermostUserID)
+// MattermostUserAlreadyConnected checks if a user is already connected
+func (p *Plugin) MattermostUserAlreadyConnected(mattermostUserID string) bool {
+	azureDevopsUserId, err := p.Store.LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID)
+	if err != nil {
+		p.API.LogError(constants.ErrorLoadingUserData, "Error", err.Error())
+		return false
+	}
+
+	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserId)
 	if err != nil {
 		p.API.LogError(constants.UnableToCheckIfAlreadyConnected, "Error", err.Error())
 		return false
