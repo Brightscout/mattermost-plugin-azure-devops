@@ -41,7 +41,7 @@ func TestStoreUser(t *testing.T) {
 				return testCase.err
 			})
 
-			err := s.StoreAzureDevopsUserDetailsWithMattermostUserId(&serializers.User{})
+			err := s.StoreAzureDevopsUserDetailsWithMattermostUserID(&serializers.User{})
 
 			if testCase.err != nil {
 				assert.NotNil(t, err)
@@ -112,7 +112,7 @@ func TestDeleteUser(t *testing.T) {
 			monkey.Patch(GetOAuthKey, func(string) string {
 				return "mockMattermostUserID"
 			})
-			monkey.PatchInstanceMethod(reflect.TypeOf(&s), "LoadAzureDevopsUserIdFromMattermostUser", func(*Store, string) (string, error) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(&s), "LoadAzureDevopsUserIDFromMattermostUser", func(*Store, string) (string, error) {
 				return testutils.MockAzureDevopsUserID, testCase.err
 			})
 			monkey.PatchInstanceMethod(reflect.TypeOf(&s), "Delete", func(*Store, string) error {

@@ -163,12 +163,12 @@ func (p *Plugin) ParseAuthToken(encoded string) (string, error) {
 
 // AddAuthorization function to add authorization to a request.
 func (p *Plugin) AddAuthorization(r *http.Request, mattermostUserID string) error {
-	azureDevopsUserId, err := p.Store.LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID)
+	azureDevopsUserID, err := p.Store.LoadAzureDevopsUserIDFromMattermostUser(mattermostUserID)
 	if err != nil {
 		return err
 	}
 
-	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserId)
+	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserID)
 	if err != nil {
 		return err
 	}

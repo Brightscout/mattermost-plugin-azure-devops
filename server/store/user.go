@@ -3,13 +3,13 @@ package store
 import "github.com/mattermost/mattermost-plugin-azure-devops/server/serializers"
 
 type UserStore interface {
-	StoreAzureDevopsUserDetailsWithMattermostUserId(user *serializers.User) error
-	LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID string) (string, error)
+	StoreAzureDevopsUserDetailsWithMattermostUserID(user *serializers.User) error
+	LoadAzureDevopsUserIDFromMattermostUser(mattermostUserID string) (string, error)
 	LoadAzureDevopsUserDetails(userID string) (*serializers.User, error)
 	DeleteUser(mattermostUserID string) (bool, error)
 }
 
-func (s *Store) StoreAzureDevopsUserDetailsWithMattermostUserId(user *serializers.User) error {
+func (s *Store) StoreAzureDevopsUserDetailsWithMattermostUserID(user *serializers.User) error {
 	if err := s.StoreJSON(GetAzureDevOpsUserKey(user.ID), user); err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (s *Store) StoreAzureDevopsUserDetailsWithMattermostUserId(user *serializer
 	return nil
 }
 
-func (s *Store) LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID string) (string, error) {
+func (s *Store) LoadAzureDevopsUserIDFromMattermostUser(mattermostUserID string) (string, error) {
 	azureDevopsUserID, err := s.Load(GetOAuthKey(mattermostUserID))
 	if err != nil {
 		return "", err
@@ -39,12 +39,12 @@ func (s *Store) LoadAzureDevopsUserDetails(userID string) (*serializers.User, er
 }
 
 func (s *Store) DeleteUser(mattermostUserID string) (bool, error) {
-	azureDevopsUserId, err := s.LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID)
+	azureDevopsUserID, err := s.LoadAzureDevopsUserIDFromMattermostUser(mattermostUserID)
 	if err != nil {
 		return false, err
 	}
 
-	if err := s.Delete(GetAzureDevOpsUserKey(azureDevopsUserId)); err != nil {
+	if err := s.Delete(GetAzureDevOpsUserKey(azureDevopsUserID)); err != nil {
 		return false, err
 	}
 

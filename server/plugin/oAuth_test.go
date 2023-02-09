@@ -330,7 +330,7 @@ func TestGenerateAndStoreOAuthToken(t *testing.T) {
 			})
 
 			if testCase.storeError == nil {
-				mockedStore.EXPECT().StoreAzureDevopsUserDetailsWithMattermostUserId(&serializers.User{
+				mockedStore.EXPECT().StoreAzureDevopsUserDetailsWithMattermostUserID(&serializers.User{
 					ExpiresAt: time.Now().UTC().Add(time.Second * time.Duration(0)).Unix(),
 				}).Return(testCase.storeUserError)
 			}
@@ -378,7 +378,7 @@ func TestIsAccessTokenExpired(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
-			mockedStore.EXPECT().LoadAzureDevopsUserIdFromMattermostUser(testutils.MockMattermostUserID).Return(testutils.MockAzureDevopsUserID, nil)
+			mockedStore.EXPECT().LoadAzureDevopsUserIDFromMattermostUser(testutils.MockMattermostUserID).Return(testutils.MockAzureDevopsUserID, nil)
 			mockedStore.EXPECT().LoadAzureDevopsUserDetails(testutils.MockAzureDevopsUserID).Return(&serializers.User{}, nil)
 
 			p.setConfiguration(
@@ -423,7 +423,7 @@ func TestUserAlreadyConnected(t *testing.T) {
 	} {
 		mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return(nil)
 
-		mockedStore.EXPECT().LoadAzureDevopsUserIdFromMattermostUser(testutils.MockMattermostUserID).Return(testutils.MockAzureDevopsUserID, nil)
+		mockedStore.EXPECT().LoadAzureDevopsUserIDFromMattermostUser(testutils.MockMattermostUserID).Return(testutils.MockAzureDevopsUserID, nil)
 		mockedStore.EXPECT().LoadAzureDevopsUserDetails(testutils.MockAzureDevopsUserID).Return(&serializers.User{}, nil)
 
 		t.Run(testCase.description, func(t *testing.T) {

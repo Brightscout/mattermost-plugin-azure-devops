@@ -217,7 +217,7 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 			return errors.Wrap(err, "failed to DM user")
 		}
 
-		return errors.New(fmt.Sprintf(constants.ErrorMessageAzureDevopsAccountAlreadyConnected, userProfile.Email))
+		return fmt.Errorf(constants.ErrorMessageAzureDevopsAccountAlreadyConnected, userProfile.Email)
 	}
 
 	encryptedAccessToken, err := p.Encrypt([]byte(successResponse.AccessToken), []byte(p.getConfiguration().EncryptionSecret))
@@ -246,7 +246,7 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 		UserProfile:      *userProfile,
 	}
 
-	if err := p.Store.StoreAzureDevopsUserDetailsWithMattermostUserId(&user); err != nil {
+	if err := p.Store.StoreAzureDevopsUserDetailsWithMattermostUserID(&user); err != nil {
 		return err
 	}
 
@@ -255,13 +255,13 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 
 // IsAccessTokenExpired checks if a user's access token is expired
 func (p *Plugin) IsAccessTokenExpired(mattermostUserID string) (bool, string) {
-	azureDevopsUserId, err := p.Store.LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID)
+	azureDevopsUserID, err := p.Store.LoadAzureDevopsUserIDFromMattermostUser(mattermostUserID)
 	if err != nil {
 		p.API.LogError(constants.ErrorLoadingUserData, "Error", err.Error())
 		return false, ""
 	}
 
-	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserId)
+	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserID)
 	if err != nil {
 		p.API.LogError(constants.ErrorLoadingUserData, "Error", err.Error())
 		return false, ""
@@ -278,13 +278,13 @@ func (p *Plugin) IsAccessTokenExpired(mattermostUserID string) (bool, string) {
 
 // MattermostUserAlreadyConnected checks if a user is already connected
 func (p *Plugin) MattermostUserAlreadyConnected(mattermostUserID string) bool {
-	azureDevopsUserId, err := p.Store.LoadAzureDevopsUserIdFromMattermostUser(mattermostUserID)
+	azureDevopsUserID, err := p.Store.LoadAzureDevopsUserIDFromMattermostUser(mattermostUserID)
 	if err != nil {
 		p.API.LogError(constants.ErrorLoadingUserData, "Error", err.Error())
 		return false
 	}
 
-	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserId)
+	user, err := p.Store.LoadAzureDevopsUserDetails(azureDevopsUserID)
 	if err != nil {
 		p.API.LogError(constants.UnableToCheckIfAlreadyConnected, "Error", err.Error())
 		return false

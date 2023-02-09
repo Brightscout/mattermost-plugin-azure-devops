@@ -58,7 +58,7 @@ func (c *client) GenerateOAuthToken(encodedFormValues url.Values) (*serializers.
 func (c *client) GetUserProfile(id, accessToken string) (*serializers.UserProfile, int, error) {
 	var userProfile *serializers.UserProfile
 
-	_, statusCode, err := c.makeHttpRequestWithAccessToken(constants.BaseOauthURL, fmt.Sprintf(constants.PathUserProfile, id), http.MethodGet, accessToken, "application/json", &userProfile)
+	_, statusCode, err := c.makeHTTPRequestWithAccessToken(constants.BaseOauthURL, fmt.Sprintf(constants.PathUserProfile, id), http.MethodGet, accessToken, "application/json", &userProfile)
 	if err != nil {
 		return nil, statusCode, err
 	}
@@ -403,7 +403,7 @@ func (c *client) CallJSON(url, path, method, mattermostUserID string, in, out in
 // Makes HTTP request to REST APIs
 func (c *client) Call(basePath, method, path, contentType string, mattermostUserID string, inBody io.Reader, out interface{}, formValues url.Values) (responseData []byte, statusCode int, err error) {
 	errContext := fmt.Sprintf("Azure DevOps: Call failed: method:%s, path:%s", method, path)
-	err, URL := c.parsePath(basePath, path, method)
+	URL, err := c.parsePath(basePath, path, method)
 	if err != nil {
 		return nil, http.StatusInternalServerError, errors.WithMessage(err, errContext)
 	}
@@ -453,7 +453,7 @@ func (c *client) Call(basePath, method, path, contentType string, mattermostUser
 		}
 	}
 
-	return c.makeHttpRequest(req, contentType, out)
+	return c.makeHTTPRequest(req, contentType, out)
 }
 
 func (c *client) OpenDialogRequest(body *model.OpenDialogRequest, mattermostUserID string) (int, error) {
@@ -461,17 +461,17 @@ func (c *client) OpenDialogRequest(body *model.OpenDialogRequest, mattermostUser
 	return statusCode, err
 }
 
-func (c *client) parsePath(basePath, path, method string) (error, string) {
+func (c *client) parsePath(basePath, path, method string) (string, error) {
 	pathURL, err := url.Parse(path)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	if pathURL.Scheme == "" || pathURL.Host == "" {
 		var baseURL *url.URL
 		baseURL, err = url.Parse(basePath)
 		if err != nil {
-			return err, ""
+			return "", err
 		}
 		if path[0] != '/' {
 			path = "/" + path
@@ -479,10 +479,10 @@ func (c *client) parsePath(basePath, path, method string) (error, string) {
 		path = baseURL.String() + path
 	}
 
-	return nil, path
+	return path, nil
 }
 
-func (c *client) makeHttpRequest(req *http.Request, contentType string, out interface{}) (responseData []byte, statusCode int, err error) {
+func (c *client) makeHTTPRequest(req *http.Request, contentType string, out interface{}) (responseData []byte, statusCode int, err error) {
 	if contentType != "" {
 		req.Header.Add("Content-Type", contentType)
 	}
@@ -525,8 +525,8 @@ func (c *client) makeHttpRequest(req *http.Request, contentType string, out inte
 	return responseData, resp.StatusCode, fmt.Errorf("errorMessage %s", errResp.Message)
 }
 
-func (c *client) makeHttpRequestWithAccessToken(basePath, path, method, accessToken, contentType string, out interface{}) (responseData []byte, statusCode int, err error) {
-	err, URL := c.parsePath(basePath, path, method)
+func (c *client) makeHTTPRequestWithAccessToken(basePath, path, method, accessToken, contentType string, out interface{}) (responseData []byte, statusCode int, err error) {
+	URL, err := c.parsePath(basePath, path, method)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
@@ -538,7 +538,7 @@ func (c *client) makeHttpRequestWithAccessToken(basePath, path, method, accessTo
 
 	req.Header.Add(constants.Authorization, fmt.Sprintf("%s %s", constants.Bearer, accessToken))
 
-	return c.makeHttpRequest(req, contentType, out)
+	return c.makeHTTPRequest(req, contentType, out)
 }
 
 func InitClient(p *Plugin) Client {
