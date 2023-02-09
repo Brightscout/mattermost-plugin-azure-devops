@@ -140,7 +140,7 @@ func (p *Plugin) GenerateOAuthToken(code, state string) error {
 		"redirect_uri":          {fmt.Sprintf("%s%s%s", p.GetSiteURL(), p.GetPluginURLPath(), constants.PathOAuthCallback)},
 	}
 
-	if err := p.GenerateAndStoreOAuthToken(mattermostUserID, oauthTokenFormValues); err != nil {
+	if err := p.GenerateAndStoreOAuthToken(mattermostUserID, oauthTokenFormValues, false); err != nil {
 		return err
 	}
 
@@ -183,11 +183,11 @@ func (p *Plugin) RefreshOAuthToken(mattermostUserID, refreshToken string) error 
 		"redirect_uri":          {fmt.Sprintf("%s%s%s", p.GetSiteURL(), p.GetPluginURLPath(), constants.PathOAuthCallback)},
 	}
 
-	return p.GenerateAndStoreOAuthToken(mattermostUserID, oauthTokenFormValues)
+	return p.GenerateAndStoreOAuthToken(mattermostUserID, oauthTokenFormValues, true)
 }
 
 // GenerateAndStoreOAuthToken generates and stores OAuth token
-func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenFormValues url.Values) error {
+func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenFormValues url.Values, isTokenRefreshRequest bool) error {
 	successResponse, _, err := p.Client.GenerateOAuthToken(oauthTokenFormValues)
 	if err != nil {
 		if _, DMErr := p.DM(mattermostUserID, constants.GenericErrorMessage, false); DMErr != nil {
@@ -212,7 +212,7 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 		return errors.Wrap(err, "failed to get user details")
 	}
 
-	if azureDevopsUser.AccessToken != "" {
+	if !isTokenRefreshRequest && azureDevopsUser.AccessToken != "" {
 		if _, DMErr := p.DM(mattermostUserID, fmt.Sprintf(constants.ErrorMessageAzureDevopsAccountAlreadyConnected, userProfile.Email), false); DMErr != nil {
 			return errors.Wrap(err, "failed to DM user")
 		}

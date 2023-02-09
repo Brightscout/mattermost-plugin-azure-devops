@@ -186,7 +186,7 @@ func TestGenerateOAuthToken(t *testing.T) {
 			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "DM", func(_ *Plugin, _, _ string, _ bool, _ ...interface{}) (string, error) {
 				return "", testCase.DMError
 			})
-			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GenerateAndStoreOAuthToken", func(_ *Plugin, _ string, _ url.Values) error {
+			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GenerateAndStoreOAuthToken", func(_ *Plugin, _ string, _ url.Values, _ bool) error {
 				return nil
 			})
 
@@ -271,7 +271,7 @@ func TestRefreshOAuthToken(t *testing.T) {
 			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "Decrypt", func(_ *Plugin, _, _ []byte) ([]byte, error) {
 				return nil, testCase.decryptError
 			})
-			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GenerateAndStoreOAuthToken", func(_ *Plugin, _ string, _ url.Values) error {
+			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GenerateAndStoreOAuthToken", func(_ *Plugin, _ string, _ url.Values, _ bool) error {
 				return nil
 			})
 
@@ -341,7 +341,7 @@ func TestGenerateAndStoreOAuthToken(t *testing.T) {
 					AzureDevopsOAuthClientSecret: "mockAzureDevopsOAuthClientSecret",
 				})
 
-			err := p.GenerateAndStoreOAuthToken("", nil)
+			err := p.GenerateAndStoreOAuthToken("", nil, false)
 			if testCase.expectedError != "" {
 				assert.NotNil(t, err)
 				return
