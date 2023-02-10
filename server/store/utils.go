@@ -132,7 +132,7 @@ func GetOAuthKey(mattermostUserID string) string {
 	return fmt.Sprintf(constants.OAuthPrefix, mattermostUserID)
 }
 
-func GetAzureDevOpsUserKey(azureDevopsUserID string) string {
+func GetAzureDevopsUserKey(azureDevopsUserID string) string {
 	return fmt.Sprintf(constants.AzureDevOpsUserPrefix, azureDevopsUserID)
 }
 

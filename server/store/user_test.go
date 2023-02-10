@@ -28,7 +28,7 @@ func TestStoreUser(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			monkey.Patch(GetAzureDevOpsUserKey, func(string) string {
+			monkey.Patch(GetAzureDevopsUserKey, func(string) string {
 				return testutils.MockAzureDevopsUserID
 			})
 			monkey.Patch(GetOAuthKey, func(string) string {
@@ -106,7 +106,7 @@ func TestDeleteUser(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			monkey.Patch(GetAzureDevOpsUserKey, func(string) string {
+			monkey.Patch(GetAzureDevopsUserKey, func(string) string {
 				return testutils.MockAzureDevopsUserID
 			})
 			monkey.Patch(GetOAuthKey, func(string) string {

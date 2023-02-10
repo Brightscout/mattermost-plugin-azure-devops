@@ -196,7 +196,7 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 		return errors.Wrap(err, "failed to generate oAuth token")
 	}
 
-	userProfile, _, err := p.Client.GetUserProfile("me", successResponse.AccessToken)
+	userProfile, _, err := p.Client.GetUserProfile(constants.CurrentAzureDevopsUserProfileId, successResponse.AccessToken)
 	if err != nil {
 		if _, DMErr := p.DM(mattermostUserID, constants.GenericErrorMessage, false); DMErr != nil {
 			return DMErr
@@ -209,7 +209,7 @@ func (p *Plugin) GenerateAndStoreOAuthToken(mattermostUserID string, oauthTokenF
 		if _, DMErr := p.DM(mattermostUserID, constants.GenericErrorMessage, false); DMErr != nil {
 			return DMErr
 		}
-		return errors.Wrap(err, "failed to get user details")
+		return errors.Wrap(err, "failed to get the user details")
 	}
 
 	if !isTokenRefreshRequest && azureDevopsUser.AccessToken != "" {
