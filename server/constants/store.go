@@ -15,5 +15,5 @@ const (
 	ProjectPrefix         = "project_list"
 	SubscriptionPrefix    = "subscription_list"
 	UserIDPrefix          = "oAuth"
-	AzureDevOpsUserPrefix = "azd_userid_%s"
+	AzureDevOpsUserPrefix = "azd_userID_%s"
 )

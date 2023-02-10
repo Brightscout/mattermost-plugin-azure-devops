@@ -55,10 +55,10 @@ func (c *client) GenerateOAuthToken(encodedFormValues url.Values) (*serializers.
 	return oAuthSuccessResponse, statusCode, nil
 }
 
-func (c *client) GetUserProfile(id, accessToken string) (*serializers.UserProfile, int, error) {
+func (c *client) GetUserProfile(ID, accessToken string) (*serializers.UserProfile, int, error) {
 	var userProfile *serializers.UserProfile
 
-	_, statusCode, err := c.makeHTTPRequestWithAccessToken(constants.BaseOauthURL, fmt.Sprintf(constants.PathUserProfile, id), http.MethodGet, accessToken, "application/json", &userProfile)
+	_, statusCode, err := c.makeHTTPRequestWithAccessToken(constants.BaseOauthURL, fmt.Sprintf(constants.PathUserProfile, ID), http.MethodGet, accessToken, "application/json", &userProfile)
 	if err != nil {
 		return nil, statusCode, err
 	}
