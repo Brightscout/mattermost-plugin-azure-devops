@@ -16,5 +16,5 @@ const (
 	PathToken       = "/oauth2/token"
 	PathUserProfile = "/_apis/profile/profiles/%s"
 
-	CurrentAzureDevopsUserProfileId = "me"
+	CurrentAzureDevopsUserProfileID = "me"
 )
