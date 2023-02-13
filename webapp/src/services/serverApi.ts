@@ -5,17 +5,14 @@ import Cookies from 'js-cookie';
 import Constants from 'pluginConstants';
 import Utils from 'utils';
 
-// Service to make plugin API requests
+// Service to make Mattermost's server API requests
 export const mattermostServerApi = createApi({
     reducerPath: 'mattermostServerApi',
     baseQuery: fetchBaseQuery({
         baseUrl: Utils.getBaseUrls().mattermostApiBaseUrl,
         prepareHeaders: (headers) => {
-            const token = Cookies.get(Constants.common.MMAUTHTOKEN);
-
-            if (token) {
-                headers.set('authorization', `Bearer ${token}`);
-            }
+            headers.set('authorization', `Bearer ${Cookies.get(Constants.common.MMAUTHTOKEN)}`);
+            headers.set(Constants.common.HeaderCSRFToken, Cookies.get(Constants.common.MMCSRF) ?? '');
 
             return headers;
         },
@@ -26,7 +23,6 @@ export const mattermostServerApi = createApi({
             query: (params) => {
                 const currentUserId = Cookies.get(Constants.common.MMUSERID) ?? '';
                 return ({
-                    headers: {[Constants.common.HeaderCSRFToken]: Cookies.get(Constants.common.MMCSRF)},
                     url: Constants.mattermostApiServiceConfigs.getChannels.path([currentUserId, params.teamId]),
                     method: Constants.mattermostApiServiceConfigs.getChannels.method,
                 });

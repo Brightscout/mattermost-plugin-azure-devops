@@ -8,7 +8,7 @@ function usePluginApi() {
     const state = useSelector((reduxState: ReduxState) => reduxState);
     const dispatch = useDispatch();
 
-    // Pass payload only in POST rquests for GET requests there is no need to pass payload argument
+    // Pass payload only in POST requests for GET requests there is no need to pass payload argument
     const makeApiRequest = async (serviceName: PluginApiServiceName, payload: APIRequestPayload): Promise<any> => {
         return dispatch(azureDevOpsPluginApi.endpoints[serviceName].initiate(payload)); //TODO: add proper type here
     };
@@ -21,7 +21,7 @@ function usePluginApi() {
         }
     };
 
-    // Pass payload only in POST rquests for GET requests there is no need to pass payload argument
+    // Pass payload only in POST requests for GET requests there is no need to pass payload argument
     const getApiState = (serviceName: PluginApiServiceName, payload: APIRequestPayload) => {
         const {data, isError, isLoading, isSuccess, error, isUninitialized} = azureDevOpsPluginApi.endpoints[serviceName].select(payload)(state['plugins-mattermost-plugin-azure-devops']);
         return {data, isError, isLoading, isSuccess, error, isUninitialized};
