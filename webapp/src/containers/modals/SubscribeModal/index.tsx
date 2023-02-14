@@ -3,6 +3,8 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import {GlobalState} from 'mattermost-redux/types/store';
 import mm_constants from 'mattermost-redux/constants/general';
+import {Client4} from 'mattermost-redux/client';
+import {Channel} from 'mattermost-redux/types/channels';
 
 import {eventTypeBoards, eventTypePipelines, eventTypeRepos, filterLabelValuePairAll} from 'pluginConstants/common';
 import {boardEventTypeOptions, pipelineEventTypeOptions, repoEventTypeOptions} from 'pluginConstants/form';
@@ -59,6 +61,8 @@ const SubscribeModal = () => {
     const [showResultPanel, setShowResultPanel] = useState(false);
     const [isFiltersError, setIsFiltersError] = useState<boolean>(false);
     const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+    const [channelList, setChannelList] = useState<Channel[]>([]);
+    const [isChannelListLoading, setIsChannelListLoading] = useState<boolean>();
 
     // Function to hide the modal and reset all the states.
     const resetModalState = () => {
@@ -84,15 +88,6 @@ const SubscribeModal = () => {
         };
     };
 
-    // Get channel state
-    const getChannelState = () => {
-        const {isLoading, isSuccess, isError, data} = getMattermostApiState(
-            pluginConstants.mattermostApiServiceConfigs.getChannels.apiServiceName,
-            {teamId: currentTeamId},
-        );
-        return {isLoading, isSuccess, isError, data: data as ChannelList[]};
-    };
-
     const {
         isSuccess: isOrganizationAndProjectListSuccess,
         isError: isOrganizationAndProjectListError,
@@ -100,8 +95,6 @@ const SubscribeModal = () => {
         organizationList,
         projectList,
     } = getOrganizationAndProjectState();
-
-    const {data: channelList, isError: isChannelListError, isLoading: isChannelListLoading, isSuccess: isChannelListSuccess} = getChannelState();
 
     // Get option list for each types of dropdown fields
     const getDropDownOptions = (fieldName: SubscriptionModalFields) => {
@@ -173,7 +166,7 @@ const SubscribeModal = () => {
 
     // Return different types of error messages occurred on API call
     const showApiErrorMessages = (isCreateSubscriptionError: boolean, error?: ApiErrorResponse) => {
-        if (isChannelListError) {
+        if (channelList.length <= 0) {
             return pluginConstants.messages.error.errorFetchingChannelsList;
         }
         if (isOrganizationAndProjectListError) {
@@ -205,10 +198,18 @@ const SubscribeModal = () => {
 
     // Make API request to fetch channel list
     useEffect(() => {
-        makeMattermostApiRequest(
-            pluginConstants.mattermostApiServiceConfigs.getChannels.apiServiceName,
-            {teamId: currentTeamId},
-        );
+        if (visibility) {
+            (async () => {
+                setIsChannelListLoading(true);
+                const channels = await Client4.getMyChannels(currentTeamId);
+                if (channels.length > 0) {
+                    setChannelList(channels);
+                    setIsChannelListLoading(false);
+                } else {
+                    setIsChannelListLoading(false);
+                }
+            })();
+        }
     }, [visibility]);
 
     // Autoselect serviceType based on slash command
@@ -222,9 +223,8 @@ const SubscribeModal = () => {
     // Set organization, project and channel list values
     useEffect(() => {
         let isCurrentChannelIdPresentInChannelList = false; // Check if the current channel ID is the ID of a public or private channel and not the ID of a DM or group channel
-        if (isChannelListSuccess && !showResultPanel) {
+        if (channelList.length > 0 && !showResultPanel) {
             const publicAndPrivateChannelList: LabelValuePair[] = [];
-
             if (channelList.length) {
                 channelList.forEach((channel) => {
                     if (channel.type === mm_constants.PRIVATE_CHANNEL || channel.type === mm_constants.OPEN_CHANNEL) {
@@ -269,7 +269,6 @@ const SubscribeModal = () => {
             }
         }
     }, [
-        isChannelListLoading,
         isOrganizationAndProjectListLoading,
         showResultPanel,
     ]);
