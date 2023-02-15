@@ -17,7 +17,6 @@ import ResultPanel from 'components/resultPanel';
 
 import useApiRequestCompletionState from 'hooks/useApiRequestCompletionState';
 import usePluginApi from 'hooks/usePluginApi';
-import useMattermostApi from 'hooks/useMattermostApi';
 import useForm from 'hooks/useForm';
 
 import {setServiceType, toggleShowSubscribeModal} from 'reducers/subscribeModal';
@@ -46,11 +45,9 @@ const SubscribeModal = () => {
     } = useForm(subscriptionModalFields);
     const {
         getApiState,
-        makeApiRequest,
         makeApiRequestWithCompletionStatus,
         state,
     } = usePluginApi();
-    const {makeMattermostApiRequest, getMattermostApiState} = useMattermostApi();
     const {visibility, project, organization, serviceType, projectID} = getSubscribeModalState(state);
     const {currentTeamId} = useSelector((reduxState: GlobalState) => reduxState.entities.teams);
     const {currentChannelId} = useSelector((reduxState: GlobalState) => reduxState.entities.channels);
