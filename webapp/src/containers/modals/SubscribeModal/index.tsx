@@ -202,7 +202,7 @@ const SubscribeModal = () => {
             (async () => {
                 setIsChannelListLoading(true);
                 const channels = await Client4.getMyChannels(currentTeamId);
-                if (channels.length > 0) {
+                if (channels.length) {
                     setChannelList(channels);
                 }
 
