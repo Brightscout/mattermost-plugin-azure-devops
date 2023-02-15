@@ -166,7 +166,7 @@ const SubscribeModal = () => {
 
     // Return different types of error messages occurred on API call
     const showApiErrorMessages = (isCreateSubscriptionError: boolean, error?: ApiErrorResponse) => {
-        if (channelList.length <= 0) {
+        if (!channelList.length) {
             return pluginConstants.messages.error.errorFetchingChannelsList;
         }
         if (isOrganizationAndProjectListError) {
@@ -204,10 +204,9 @@ const SubscribeModal = () => {
                 const channels = await Client4.getMyChannels(currentTeamId);
                 if (channels.length > 0) {
                     setChannelList(channels);
-                    setIsChannelListLoading(false);
-                } else {
-                    setIsChannelListLoading(false);
                 }
+
+                setIsChannelListLoading(false);
             })();
         }
     }, [visibility]);
@@ -223,7 +222,7 @@ const SubscribeModal = () => {
     // Set organization, project and channel list values
     useEffect(() => {
         let isCurrentChannelIdPresentInChannelList = false; // Check if the current channel ID is the ID of a public or private channel and not the ID of a DM or group channel
-        if (channelList.length > 0 && !showResultPanel) {
+        if (channelList.length && !showResultPanel) {
             const publicAndPrivateChannelList: LabelValuePair[] = [];
             if (channelList.length) {
                 channelList.forEach((channel) => {
