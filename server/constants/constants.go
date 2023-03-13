@@ -171,7 +171,7 @@ const (
 
 	DialogFieldNameComment = "comment"
 
-	MaxBytesSizeForReadingClientBody = 1000000
+	MaxBytesSizeForReadingResponseBody = 1000000
 )
 
 var (
