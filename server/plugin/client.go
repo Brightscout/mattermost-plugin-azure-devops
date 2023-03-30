@@ -232,9 +232,8 @@ func (c *client) CreateSubscription(body *serializers.CreateSubscriptionRequestP
 	}
 	createSubscriptionPath := fmt.Sprintf(constants.CreateSubscription, body.Organization)
 
-	webhookSecret := url.QueryEscape(c.plugin.getConfiguration().WebhookSecret)
 	consumerInputs := serializers.ConsumerInputs{
-		URL: fmt.Sprintf("%s%s?%s=%s&%s=%s", strings.TrimRight(pluginURL, "/"), constants.PathSubscriptionNotifications, constants.AzureDevopsQueryParamChannelID, channelID, constants.AzureDevopsQueryParamWebhookSecret, webhookSecret),
+		URL: fmt.Sprintf("%s%s", strings.TrimRight(pluginURL, "/"), constants.PathSubscriptionNotifications),
 	}
 
 	payload := serializers.CreateSubscriptionBodyPayload{

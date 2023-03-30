@@ -250,3 +250,43 @@ func (mr *MockKVStoreMockRecorder) VerifyOAuthState(arg0, arg1 interface{}) *gom
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyOAuthState", reflect.TypeOf((*MockKVStore)(nil).VerifyOAuthState), arg0, arg1)
 }
+
+// StoreSubscriptionIDAndLinkedChannelID mocks base method
+func (m *MockKVStore) StoreSubscriptionIDAndLinkedChannelID(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StoreSubscriptionIDAndLinkedChannelID", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockKVStoreMockRecorder) StoreSubscriptionIDAndLinkedChannelID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreSubscriptionIDAndLinkedChannelID", reflect.TypeOf((*MockKVStore)(nil).StoreSubscriptionIDAndLinkedChannelID), arg0, arg1)
+}
+
+// GetLinkedChannelIDForSubscription mocks base method
+func (m *MockKVStore) GetLinkedChannelIDForSubscription(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLinkedChannelIDForSubscription", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockKVStoreMockRecorder) GetLinkedChannelIDForSubscription(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLinkedChannelIDForSubscription", reflect.TypeOf((*MockKVStore)(nil).GetLinkedChannelIDForSubscription), arg0)
+}
+
+// DeleteSubscriptionIDAndLinkedChannelID mocks base method
+func (m *MockKVStore) DeleteSubscriptionIDAndLinkedChannelID(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSubscriptionIDAndLinkedChannelID", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockKVStoreMockRecorder) DeleteSubscriptionIDAndLinkedChannelID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSubscriptionIDAndLinkedChannelID", reflect.TypeOf((*MockKVStore)(nil).DeleteSubscriptionIDAndLinkedChannelID), arg0)
+}

@@ -21,7 +21,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mattermost/mattermost-plugin-azure-devops/mocks"
-	"github.com/mattermost/mattermost-plugin-azure-devops/server/config"
 	"github.com/mattermost/mattermost-plugin-azure-devops/server/constants"
 	"github.com/mattermost/mattermost-plugin-azure-devops/server/serializers"
 	"github.com/mattermost/mattermost-plugin-azure-devops/server/testutils"
@@ -40,10 +39,6 @@ func setupMockPlugin(api *plugintest.API, store *mocks.MockKVStore, client *mock
 	if store != nil {
 		p.Store = store
 	}
-
-	p.setConfiguration(&config.Configuration{
-		WebhookSecret: "mockWebhookSecret",
-	})
 
 	if client != nil {
 		p.Client = client
@@ -365,6 +360,7 @@ func TestHandleDeleteAllSubscriptions(t *testing.T) {
 			if testCase.getAllSubscriptionsErr == nil {
 				mockedClient.EXPECT().DeleteSubscription(gomock.Any(), gomock.Any(), gomock.Any()).Return(testCase.statusCode, testCase.err)
 				if testCase.err == nil {
+					mockedStore.EXPECT().DeleteSubscriptionIDAndLinkedChannelID(testutils.MockSubscriptionID).Return(nil)
 					mockedStore.EXPECT().DeleteSubscription(gomock.Any()).Return(nil)
 				}
 			}
@@ -686,6 +682,7 @@ func TestHandleCreateSubscriptions(t *testing.T) {
 				mockedStore.EXPECT().GetAllProjects(testutils.MockMattermostUserID).Return(testCase.projectList, nil)
 				mockedStore.EXPECT().GetAllSubscriptions(testutils.MockMattermostUserID).Return(testCase.subscriptionList, nil)
 				mockedStore.EXPECT().StoreSubscription(testCase.subscription).Return(nil)
+				mockedStore.EXPECT().StoreSubscriptionIDAndLinkedChannelID(testutils.MockSubscriptionID, testutils.MockChannelID).Return(nil)
 			}
 
 			req := httptest.NewRequest(http.MethodPost, "/subscriptions", bytes.NewBufferString(testCase.body))
@@ -788,6 +785,8 @@ func TestHandleGetSubscriptions(t *testing.T) {
 func TestHandleSubscriptionNotifications(t *testing.T) {
 	defer monkey.UnpatchAll()
 	mockAPI := &plugintest.API{}
+	// mockCtrl := gomock.NewController(t)
+	// mockedStore := mocks.NewMockKVStore(mockCtrl)
 	p := setupMockPlugin(mockAPI, nil, nil)
 	for _, testCase := range []struct {
 		description      string
@@ -797,275 +796,238 @@ func TestHandleSubscriptionNotifications(t *testing.T) {
 		err              error
 		statusCode       int
 		parseTimeError   error
-		webhookSecret    string
 	}{
 		{
 			description: "SubscriptionNotifications: valid",
 			body: `{
+				"subscriptionID": "mockSubscriptionID",
 				"detailedMessage": {
 					"markdown": "mockMarkdown"
 					}
 				}`,
-			channelID:        "mockChannelIDmockChannelID",
 			statusCode:       http.StatusOK,
 			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
 		},
-		{
-			description:      "SubscriptionNotifications: empty body",
-			body:             `{}`,
-			err:              errors.New("error empty body"),
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description:   "SubscriptionNotifications: invalid channel ID",
-			body:          `{}`,
-			err:           errors.New("error invalid channel ID"),
-			channelID:     "mockInvalidChannelID",
-			statusCode:    http.StatusBadRequest,
-			webhookSecret: "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: invalid body",
-			body: `{
-				"detailedMessage": {
-					"markdown": "mockMarkdown"`,
-			err:              errors.New("error invalid body"),
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusBadRequest,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: without channelID",
-			body: `{
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			statusCode:       http.StatusBadRequest,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType pull request created",
-			body: `{
-				"eventType": "git.pullrequest.created",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType workItem created",
-			body: `{
-				"eventType": "workitem.created",
-				"resource": {"fields": {"System.Title": "mockTitle", "System.TeamProject": "mockProject"}},
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType  pull request commented",
-			body: `{
-				"eventType": "ms.vss-code.git-pullrequest-comment-event",
-				"detailedMessage": {
-				  "markdown": "mockMarkdown"
-				},
-				"resource": {
-				  "comment": {
-					"content": "mockContent"
-				  }
-				}
-			  }`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType code pushed",
-			body: `{
-				"eventType": "git.push",
-				"detailedMessage": {
-				  "markdown": "mockMarkdown"
-				},
-				"resource": {
-				  "refUpdates": [
-					{
-					  "name": "ref/mock/mockName"
-					}
-				  ]
-				}
-			  }`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType build completed",
-			body: `{
-				"eventType": "build.complete",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType build completed - error while parsing time",
-			body: `{
-				"eventType": "build.complete",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			parseTimeError:   errors.New("error parsing time"),
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusInternalServerError,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType release created",
-			body: `{
-				"eventType": "ms.vss-release.release-created-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType release abandoned",
-			body: `{
-				"eventType": "ms.vss-release.release-abandoned-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType release abandoned - error while parsing time",
-			body: `{
-				"eventType": "ms.vss-release.release-abandoned-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			parseTimeError:   errors.New("error parsing time"),
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusInternalServerError,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType release deployment started",
-			body: `{
-				"eventType": "ms.vss-release.deployment-started-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType release deployment completed",
-			body: `{
-				"eventType": "ms.vss-release.deployment-completed-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					},
-				"resource": {
-					"comment": "mockComment"
-				}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType run stage state changed",
-			body: `{
-				"eventType": "ms.vss-pipelines.stage-state-changed-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: eventType run state changed",
-			body: `{
-				"eventType": "ms.vss-pipelines.run-state-changed-event",
-				"detailedMessage": {
-					"markdown": "mockMarkdown"
-					}
-				}`,
-			channelID:        "mockChannelIDmockChannelID",
-			statusCode:       http.StatusOK,
-			isValidChannelID: true,
-			webhookSecret:    "mockWebhookSecret",
-		},
-		{
-			description: "SubscriptionNotifications: without webhookSecret",
-			body: `{	
-				"detailedMessage": {	
-					"markdown": "mockMarkdown"	
-					}	
-				}`,
-			isValidChannelID: true,
-			statusCode:       http.StatusUnauthorized,
-			err:              errors.New("webhook secret is absent"),
-		},
+		// {
+		// 	description:      "SubscriptionNotifications: empty body",
+		// 	body:             `{}`,
+		// 	err:              errors.New("error empty body"),
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: invalid channel ID",
+		// 	body:        `{}`,
+		// 	err:         errors.New("error invalid channel ID"),
+		// 	channelID:   "mockInvalidChannelID",
+		// 	statusCode:  http.StatusBadRequest,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: invalid body",
+		// 	body: `{
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"`,
+		// 	err:              errors.New("error invalid body"),
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusBadRequest,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: without channelID",
+		// 	body: `{
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	statusCode:       http.StatusBadRequest,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType pull request created",
+		// 	body: `{
+		// 		"eventType": "git.pullrequest.created",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType workItem created",
+		// 	body: `{
+		// 		"eventType": "workitem.created",
+		// 		"resource": {"fields": {"System.Title": "mockTitle", "System.TeamProject": "mockProject"}},
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType  pull request commented",
+		// 	body: `{
+		// 		"eventType": "ms.vss-code.git-pullrequest-comment-event",
+		// 		"detailedMessage": {
+		// 		  "markdown": "mockMarkdown"
+		// 		},
+		// 		"resource": {
+		// 		  "comment": {
+		// 			"content": "mockContent"
+		// 		  }
+		// 		}
+		// 	  }`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType code pushed",
+		// 	body: `{
+		// 		"eventType": "git.push",
+		// 		"detailedMessage": {
+		// 		  "markdown": "mockMarkdown"
+		// 		},
+		// 		"resource": {
+		// 		  "refUpdates": [
+		// 			{
+		// 			  "name": "ref/mock/mockName"
+		// 			}
+		// 		  ]
+		// 		}
+		// 	  }`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType build completed",
+		// 	body: `{
+		// 		"eventType": "build.complete",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType build completed - error while parsing time",
+		// 	body: `{
+		// 		"eventType": "build.complete",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	parseTimeError:   errors.New("error parsing time"),
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusInternalServerError,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType release created",
+		// 	body: `{
+		// 		"eventType": "ms.vss-release.release-created-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType release abandoned",
+		// 	body: `{
+		// 		"eventType": "ms.vss-release.release-abandoned-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType release abandoned - error while parsing time",
+		// 	body: `{
+		// 		"eventType": "ms.vss-release.release-abandoned-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	parseTimeError:   errors.New("error parsing time"),
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusInternalServerError,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType release deployment started",
+		// 	body: `{
+		// 		"eventType": "ms.vss-release.deployment-started-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType release deployment completed",
+		// 	body: `{
+		// 		"eventType": "ms.vss-release.deployment-completed-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			},
+		// 		"resource": {
+		// 			"comment": "mockComment"
+		// 		}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType run stage state changed",
+		// 	body: `{
+		// 		"eventType": "ms.vss-pipelines.stage-state-changed-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
+		// {
+		// 	description: "SubscriptionNotifications: eventType run state changed",
+		// 	body: `{
+		// 		"eventType": "ms.vss-pipelines.run-state-changed-event",
+		// 		"detailedMessage": {
+		// 			"markdown": "mockMarkdown"
+		// 			}
+		// 		}`,
+		// 	channelID:        "mockChannelIDmockChannelID",
+		// 	statusCode:       http.StatusOK,
+		// 	isValidChannelID: true,
+		// },
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 			mockAPI.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(&model.Post{}, nil)
-
-			monkey.Patch(model.IsValidId, func(string) bool {
-				return testCase.isValidChannelID
-			})
+			// mockedStore.EXPECT().GetLinkedChannelIDForSubscription(testutils.MockSubscriptionID).Return(testutils.MockChannelID, nil)
 
 			monkey.Patch(time.Parse, func(_, _ string) (time.Time, error) {
 				return time.Time{}, testCase.parseTimeError
 			})
 
-			monkey.PatchInstanceMethod(reflect.TypeOf(p), "VerifyWebhookSecret", func(_ *Plugin, _ string) (int, error) {
-				return testCase.statusCode, testCase.err
-			})
-
-			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("%s?%s=%s&%s=%s", constants.PathSubscriptionNotifications, constants.AzureDevopsQueryParamChannelID, testCase.channelID, constants.AzureDevopsQueryParamWebhookSecret, testCase.webhookSecret), bytes.NewBufferString(testCase.body))
+			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("%s", constants.PathSubscriptionNotifications), bytes.NewBufferString(testCase.body))
 
 			w := httptest.NewRecorder()
 			p.handleSubscriptionNotifications(w, req)

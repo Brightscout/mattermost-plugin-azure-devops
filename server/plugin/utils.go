@@ -457,15 +457,11 @@ func (p *Plugin) deleteSubscription(subscription *serializers.SubscriptionDetail
 		return http.StatusInternalServerError, deleteErr
 	}
 
-	return http.StatusOK, nil
-}
-
-func (p *Plugin) VerifyWebhookSecret(received string) (status int, err error) {
-	if p.getConfiguration().WebhookSecret != received {
-		return http.StatusForbidden, errors.New(constants.ErrorUnauthorisedSubscriptionsWebhookRequest)
+	if err := p.Store.DeleteSubscriptionIDAndLinkedChannelID(subscription.SubscriptionID); err != nil {
+		return http.StatusInternalServerError, err
 	}
 
-	return 0, nil
+	return http.StatusOK, nil
 }
 
 // A user can create subscription(s) only for accessible public and private channels

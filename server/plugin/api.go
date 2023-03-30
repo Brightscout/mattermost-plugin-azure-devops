@@ -325,6 +325,12 @@ func (p *Plugin) handleCreateSubscription(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if err := p.Store.StoreSubscriptionIDAndLinkedChannelID(subscription.ID, body.ChannelID); err != nil {
+		p.API.LogError("error storing subscription id and channel id", "Error", err.Error())
+		p.handleError(w, r, &serializers.Error{Code: http.StatusInternalServerError, Message: err.Error()})
+		return
+	}
+
 	channel, channelErr := p.API.GetChannel(body.ChannelID)
 	if channelErr != nil {
 		p.API.LogError(constants.GetChannelError, "Error", channelErr.Error())
@@ -560,13 +566,7 @@ func (p *Plugin) getPipelineReleaseEnvironmentList(environments []*serializers.E
 }
 
 func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.Request) {
-	webhookSecret := r.URL.Query().Get(constants.AzureDevopsQueryParamWebhookSecret)
-	if status, err := p.VerifyWebhookSecret(webhookSecret); err != nil {
-		p.API.LogError(constants.ErrorUnauthorisedSubscriptionsWebhookRequest, "Error", err.Error())
-		p.handleError(w, r, &serializers.Error{Code: status, Message: constants.ErrorUnauthorisedSubscriptionsWebhookRequest})
-		return
-	}
-
+	fmt.Println("pooost", r.Host, r.URL.Host, r.URL.Hostname(), r.URL.RawPath, r.URL.RawPath)
 	body, err := serializers.SubscriptionNotificationFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError("Error in decoding the body for listening notifications", "Error", err.Error())
@@ -574,16 +574,15 @@ func (p *Plugin) handleSubscriptionNotifications(w http.ResponseWriter, r *http.
 		return
 	}
 
-	channelID := r.URL.Query().Get(constants.AzureDevopsQueryParamChannelID)
-	if channelID == "" {
-		p.API.LogError(constants.ChannelIDRequired)
-		p.handleError(w, r, &serializers.Error{Code: http.StatusBadRequest, Message: constants.ChannelIDRequired})
+	channelID, channelErr := p.Store.GetLinkedChannelIDForSubscription(body.SubscriptionID)
+	if channelErr != nil {
+		p.API.LogError("Error getting channel id", "Error", channelErr)
+		p.handleError(w, r, &serializers.Error{Code: http.StatusInternalServerError, Message: channelErr.Error()})
 		return
 	}
-
-	if !model.IsValidId(channelID) {
-		p.API.LogError(constants.InvalidChannelID)
-		p.handleError(w, r, &serializers.Error{Code: http.StatusBadRequest, Message: constants.InvalidChannelID})
+	if channelID == "" {
+		p.API.LogWarn("Invalid subscription id")
+		p.handleError(w, r, &serializers.Error{Code: http.StatusForbidden, Message: "Invalid subscription id"})
 		return
 	}
 

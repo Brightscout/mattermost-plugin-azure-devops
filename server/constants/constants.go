@@ -122,8 +122,7 @@ const (
 	PublicFiles = "%s/plugins/%s/public/assets/%s"
 
 	// Query params sent to Azure DevOps APIs
-	AzureDevopsQueryParamWebhookSecret = "webhookSecret"
-	AzureDevopsQueryParamChannelID     = "channelID"
+	AzureDevopsQueryParamChannelID = "channelID"
 
 	PageQueryParam       = "$top"
 	APIVersionQueryParam = "api-version"

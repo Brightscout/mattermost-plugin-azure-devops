@@ -15,6 +15,9 @@ type SubscriptionStore interface {
 	GetSubscriptionList() (*SubscriptionList, error)
 	GetAllSubscriptions(userID string) ([]*serializers.SubscriptionDetails, error)
 	DeleteSubscription(subscription *serializers.SubscriptionDetails) error
+	StoreSubscriptionIDAndLinkedChannelID(subscriptionID, channelID string) error
+	GetLinkedChannelIDForSubscription(subscriptionID string) (string, error)
+	DeleteSubscriptionIDAndLinkedChannelID(subscriptionID string) error
 }
 
 type SubscriptionListMap map[string]serializers.SubscriptionDetails
@@ -197,4 +200,30 @@ func SubscriptionListFromJSON(bytes []byte) (*SubscriptionList, error) {
 		subscriptionList = NewSubscriptionList()
 	}
 	return subscriptionList, nil
+}
+
+func (s *Store) StoreSubscriptionIDAndLinkedChannelID(subscriptionID, channelID string) error {
+	if err := s.Store(subscriptionID, []byte(channelID)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) GetLinkedChannelIDForSubscription(subscriptionID string) (string, error) {
+	data, err := s.Load(subscriptionID)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func (s *Store) DeleteSubscriptionIDAndLinkedChannelID(subscriptionID string) error {
+	err := s.Delete(subscriptionID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
